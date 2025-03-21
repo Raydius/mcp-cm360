@@ -1,17 +1,19 @@
-# MCP Server SDK Boilerplate
+# Campaign Manager 360 MCP Server
 
-A comprehensive TypeScript and Node.js boilerplate for implementing the MCP Server SDK with REST API functionality. This boilerplate provides a solid foundation for building tools that access REST APIs and enables independent testing of the REST API.
+A TypeScript and Node.js implementation of the Model Context Protocol (MCP) server for Google Campaign Manager 360 (CM360). This server provides programmatic access to CM360 data and functionality through the MCP protocol, allowing LLMs to interact with Campaign Manager 360.
 
 ## Features
 
 - **TypeScript Support**: Fully typed codebase for improved developer experience
-- **MCP Server SDK Integration**: Ready-to-use implementation of the MCP Server SDK
+- **MCP Server SDK Integration**: Implementation of the MCP Server using the TypeScript SDK
+- **Campaign Manager 360 API**: Integration with Google Campaign Manager 360 API
 - **REST API Framework**: Complete Express.js REST API setup
 - **Error Handling**: Robust error handling with standardized responses
 - **Request Validation**: Input validation using express-validator
 - **Logging**: Configured Winston logger for different environments
 - **Testing**: Jest test setup for independent API testing
 - **Environment Management**: Proper environment variable configuration
+- **OAuth Authentication**: Google OAuth 2.0 authentication for CM360 API
 
 ## Project Structure
 
@@ -56,7 +58,33 @@ npm install
 cp .env.example .env
 ```
 
-4. Update the `.env` file with your MCP API key and other configuration.
+4. Update the `.env` file with your MCP API key, Google API credentials, and other configuration.
+
+### Setting Up Google API Credentials
+
+To use the Campaign Manager 360 MCP Server, you need to set up Google API credentials:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Campaign Manager 360 API (also known as DCM/DFA Reporting and Trafficking API)
+4. Create OAuth 2.0 credentials:
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "OAuth client ID"
+   - Select "Web application" as the application type
+   - Add authorized redirect URIs (e.g., http://localhost:3000/oauth/callback)
+   - Copy the Client ID and Client Secret to your `.env` file
+
+5. Get a refresh token:
+   - Use the Google OAuth 2.0 flow to get a refresh token
+   - You can use a tool like [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)
+   - Select the "DCM/DFA Reporting and Trafficking API v4" scope
+   - Authorize the API and exchange the authorization code for tokens
+   - Copy the refresh token to your `.env` file
+
+6. Get your CM360 Profile ID and Account ID:
+   - You can find these in the Campaign Manager 360 UI
+   - Or use the API to list available user profiles and accounts
+   - Add these to your `.env` file
 
 ### Development
 
@@ -95,6 +123,54 @@ Run tests with coverage:
 ```bash
 npm run test:coverage
 ```
+
+## Campaign Manager 360 MCP Server
+
+The CM360 MCP Server implements the Model Context Protocol to provide access to Google Campaign Manager 360 data and functionality. It exposes resources and tools that can be used by LLMs to interact with CM360.
+
+### Resources
+
+The server exposes the following resources:
+
+- **Account**: `cm360://accounts/{accountId}` - Get information about a CM360 account
+- **Campaigns**: `cm360://accounts/{accountId}/campaigns` - List campaigns in an account
+- **Campaign**: `cm360://accounts/{accountId}/campaigns/{campaignId}` - Get information about a specific campaign
+- **Reports**: `cm360://accounts/{accountId}/reports` - List reports in an account
+
+### Tools
+
+The server provides the following tools:
+
+- **get-campaign-performance**: Get performance metrics for a campaign
+  - Parameters:
+    - `campaignId`: ID of the campaign
+    - `startDate`: Start date in YYYY-MM-DD format
+    - `endDate`: End date in YYYY-MM-DD format
+  
+- **create-campaign**: Create a new campaign
+  - Parameters:
+    - `name`: Name of the campaign
+    - `advertiserId`: ID of the advertiser
+    - `startDate`: Start date in YYYY-MM-DD format
+    - `endDate`: End date in YYYY-MM-DD format
+
+- **update-campaign**: Update an existing campaign
+  - Parameters:
+    - `campaignId`: ID of the campaign
+    - `name`: (Optional) New name for the campaign
+    - `startDate`: (Optional) New start date in YYYY-MM-DD format
+    - `endDate`: (Optional) New end date in YYYY-MM-DD format
+    - `status`: (Optional) New status ('ACTIVE', 'ARCHIVED', or 'PAUSED')
+
+### Using the MCP Server
+
+The MCP server can be accessed through two transports:
+
+1. **HTTP with SSE**: Access the server through HTTP endpoints
+   - SSE Endpoint: `http://localhost:3000/mcp/sse`
+   - Messages Endpoint: `http://localhost:3000/mcp/messages`
+
+2. **stdio**: In development mode, the server also connects to stdio for command-line tools
 
 ## Using the MCP Client
 
@@ -190,7 +266,23 @@ describe('Real API Integration Tests', () => {
 });
 ```
 
-## Customizing the Boilerplate
+## Examples
+
+The `examples/` directory contains sample code demonstrating how to use the CM360 MCP Server:
+
+- `cm360-client-example.ts`: Shows how to create an MCP client that connects to the CM360 MCP Server and uses its resources and tools
+
+To run the example:
+
+```bash
+# Build the project first
+npm run build
+
+# Run the example
+npx ts-node examples/cm360-client-example.ts
+```
+
+## Customizing the Server
 
 ### Adding New API Endpoints
 
@@ -198,6 +290,14 @@ describe('Real API Integration Tests', () => {
 2. Create a new controller in `src/api/controllers/`
 3. Create new routes in `src/api/routes/`
 4. Register the routes in `src/app.ts`
+
+### Adding New MCP Resources or Tools
+
+To add new CM360 resources or tools:
+
+1. Modify the `registerResources` or `registerTools` methods in `src/mcp/mcpServer.ts`
+2. Follow the existing patterns for implementing resources and tools
+3. Update the README.md documentation to reflect the new capabilities
 
 ### Extending the MCP Client
 

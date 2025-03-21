@@ -2,6 +2,8 @@ import app from './app';
 import config, { validateEnvironment } from './config/environment';
 import { logger } from './config/logger';
 import { createMCPClient } from './mcp/client';
+import { createCM360McpServer } from './mcp/mcpServer';
+import express from 'express';
 
 /**
  * Initialize the MCP client
@@ -28,9 +30,35 @@ async function startServer() {
     // Make MCP client available to the application
     app.locals.mcpClient = mcpClient;
     
+    // Initialize CM360 MCP Server
+    const cm360McpServer = createCM360McpServer();
+
+    // Set up SSE endpoint for MCP server
+    app.get('/mcp/sse', async (req, res) => {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      
+      // Connect the MCP server to the SSE transport
+      await cm360McpServer.connectSSE(res, '/mcp/messages');
+    });
+
+    // Set up message endpoint for MCP server
+    app.post('/mcp/messages', express.json(), async (req, res) => {
+      await cm360McpServer.handleMessage(req, res);
+    });
+    
     // Start the server
     const server = app.listen(config.PORT, () => {
       logger.info(`Server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
+      logger.info(`MCP Server available at http://localhost:${config.PORT}/mcp/sse`);
+      
+      // Start the stdio MCP server if running in development mode
+      if (config.NODE_ENV === 'development') {
+        cm360McpServer.connectStdio().catch(error => {
+          logger.error('Failed to start stdio MCP server', { error });
+        });
+      }
     });
 
     // Handle graceful shutdown
