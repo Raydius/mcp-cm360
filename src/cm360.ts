@@ -1,6 +1,8 @@
 /**
  * CM360 API Module
  * 
+ * I have so far focused on read-only tools to prevent any accidental changes to ad trafficking
+ * 
  * @author Ray Dollete <rjdollete@gmail.com>
  */
 
@@ -76,7 +78,7 @@ export const cm360 = {
 							searchString: {
 								type: "string",
 								description: "Search query for advertiser name",
-								default: "acura"
+								default: ""
 							},
 							maxResults: {
 								type: "number",

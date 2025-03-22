@@ -65,8 +65,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 });
 
-
-
 // initialize transport
 const transport = new StdioServerTransport();
 
