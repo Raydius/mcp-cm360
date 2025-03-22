@@ -36,16 +36,32 @@ const client = new JWT({
 // base URL for CM360 API v4
 const baseUrl = `https://dfareporting.googleapis.com/dfareporting/v4/userprofiles/${env.CM360_PROFILE_ID}`;
 
+// Define schema outside the object for proper type inference
+const ListAdvertisersSchema = z.object({
+	searchString: z.string().optional().default(""),
+	maxResults: z.number().optional().default(10)
+});
 
-export type ListAdvertisersArgs = z.infer<typeof this.ListAdvertisersSchema>;
+export type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
+
+// Define interface for CM360 API response
+interface CM360Response {
+	advertisers: any[];
+	nextPageToken?: string;
+}
+
+// Define MCP response type
+interface McpResponse {
+	content: Array<{
+		type: string;
+		text: string;
+	}>;
+	isError?: boolean;
+}
 
 export const cm360 = {
 	// type definitions
-	ListAdvertisersSchema: z.object({
-		searchString: z.string(),
-		maxResults: z.number()
-	}),
-
+	ListAdvertisersSchema,
 
 	// tool definitions
 	tools: async () => {
@@ -54,7 +70,6 @@ export const cm360 = {
 				{
 					name: "list-advertisers",
 					description: "List advertisers associated with this account",
-					// todo: do we really need to init empty objects for a no-arg tool?
 					inputSchema: {
 						type: "object",
 						properties: {
@@ -65,7 +80,8 @@ export const cm360 = {
 							},
 							maxResults: {
 								type: "number",
-								description: "Maximum number of results"
+								description: "Maximum number of results",
+								default: 10
 							}
 						},
 						required: [],
@@ -74,7 +90,12 @@ export const cm360 = {
 			]
 		};
 	},
-	handleListAdvertisers: async (args: ListAdvertisersArgs) => {
+
+	handleListAdvertisers: async (args?: Record<string, unknown>): Promise<McpResponse> => {
+		// Parse arguments with zod schema
+		const parsedArgs = ListAdvertisersSchema.parse(args || {});
+		const searchString = parsedArgs.searchString;
+		const maxResults = parsedArgs.maxResults;
 		
 		const url = `${baseUrl}/advertisers`;
 
@@ -83,35 +104,54 @@ export const cm360 = {
 			let pageToken = '';
 			let isLastPage = false;
 
-			const advertisers = [];
+			const advertisers: any[] = [];
 
 			do {
 				// include a pagetoken if this is not the first iteration
-				const params = (pageToken) ? { 
-					pageToken, maxResults:3 } : {};
-
-				// placeholder
-				//params.maxResults = 3;
+				const params: Record<string, any> = (pageToken) ? { 
+					pageToken, maxResults: 3 } : { maxResults: 3 };
+				
+				// Add search string if provided
+				if (searchString) {
+					params.searchString = searchString;
+				}
 
 				// Send the request to the API
 				const res = await client.request({url, params});
+				const data = res.data as CM360Response;
 
 				// Extract advertisers from the response and add them to the array
-				advertisers.push(res.data.advertisers);
+				if (data.advertisers && Array.isArray(data.advertisers)) {
+					advertisers.push(...data.advertisers);
+				}
 
 				// Check for next page
-				pageToken = res.data.nextPageToken;
+				pageToken = data.nextPageToken || '';
 
-				if (res.data.advertisers.length == 0) {
+				if (!data.advertisers || data.advertisers.length === 0 || !pageToken) {
 					isLastPage = true;
 				}
 			}
 			while (!isLastPage);
 
-			return advertisers[0];
+			// Return in the format expected by MCP
+			return {
+				content: [{
+					type: "text",
+					text: JSON.stringify(advertisers.slice(0, maxResults), null, 2)
+				}]
+			};
 		}
 		catch (err) {
 			console.error(err);
+			// Return error response
+			return {
+				content: [{
+					type: "text",
+					text: `Error fetching advertisers: ${err instanceof Error ? err.message : String(err)}`
+				}],
+				isError: true
+			};
 		}
 	}
 };

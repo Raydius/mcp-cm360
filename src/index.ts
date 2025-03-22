@@ -35,21 +35,21 @@ const server = new Server({
 }, { capabilities: { tools: {} }});
 
 // tool definitions
-server.setRequestHandler(ListToolsRequestSchema, cm360.tools);
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+	return await cm360.tools();
+});
 
 // primary tool execution handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-
-
 	try {
 		switch (request.params.name) {
-			case "list-advertisers": 
-				return cm360.handleListAdvertisers(request.params.arguments);
+			case "list-advertisers":
+				return await cm360.handleListAdvertisers(request.params.arguments);
 			default:
 				return {
 					content: [{
 						type: "text",
-						text: `Unknown tool: ${name}`
+						text: `Unknown tool: ${request.params.name}`
 					}],
 					isError: true
 				};
