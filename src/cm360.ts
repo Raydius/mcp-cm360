@@ -76,7 +76,7 @@ export const cm360 = {
 							searchString: {
 								type: "string",
 								description: "Search query for advertiser name",
-								default: ""
+								default: "acura"
 							},
 							maxResults: {
 								type: "number",
@@ -108,16 +108,23 @@ export const cm360 = {
 
 			do {
 				// include a pagetoken if this is not the first iteration
-				const params: Record<string, any> = (pageToken) ? { 
-					pageToken, maxResults: 3 } : { maxResults: 3 };
+				const params: Record<string, any> = (pageToken) ? {
+					pageToken, maxResults: maxResults } : { maxResults: maxResults };
 				
 				// Add search string if provided
 				if (searchString) {
 					params.searchString = searchString;
 				}
 
-				// Send the request to the API
-				const res = await client.request({url, params});
+				// Add debugging
+				console.error(`Sending request to ${url} with params:`, params);
+				
+				// Send the request to the API with timeout
+				const res = await client.request({
+					url,
+					params,
+					timeout: 30000 // 30 second timeout
+				});
 				const data = res.data as CM360Response;
 
 				// Extract advertisers from the response and add them to the array
@@ -134,6 +141,8 @@ export const cm360 = {
 			}
 			while (!isLastPage);
 
+			console.error(`Successfully retrieved ${advertisers.length} advertisers`);
+
 			// Return in the format expected by MCP
 			return {
 				content: [{
@@ -143,7 +152,15 @@ export const cm360 = {
 			};
 		}
 		catch (err) {
-			console.error(err);
+			// Log detailed error information
+			console.error("Error in handleListAdvertisers:");
+			if (err instanceof Error) {
+				console.error(`- Message: ${err.message}`);
+				console.error(`- Stack: ${err.stack}`);
+			} else {
+				console.error(`- Non-Error object: ${String(err)}`);
+			}
+			
 			// Return error response
 			return {
 				content: [{
