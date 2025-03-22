@@ -28,6 +28,7 @@
 - Provide clear guidelines and examples for implementing new components
 - Establish a process for verifying compliance with the patterns
 - Apply the same modular architecture principles to other parts of the codebase
+- Complete the implementation of the modular MCP server structure by populating the auth, resources, and tools directories
 
 ## Completed Tasks
 - Updated systemPatterns.md to clearly mark mandatory patterns
@@ -36,9 +37,7 @@
 - Created a comprehensive API development guide with best practices
 - Updated productContext.md with development guidelines
 - Refactored MCP server implementation to follow modular architecture:
-  - Created src/mcp/auth/googleAuth.ts for authentication
-  - Created src/mcp/resources/ directory with modular resource implementations
-  - Created src/mcp/tools/ directory with modular tool implementations
+  - Created directory structure for src/mcp/auth/, src/mcp/resources/, and src/mcp/tools/
   - Updated main mcpServer.ts to use the new modular components
 
 ## Open Questions
@@ -48,3 +47,4 @@
 - How should we handle versioning of the API as the project evolves?
 - What additional tooling could help enforce the architecture patterns?
 - Should we apply the same modular approach to the REST API implementation?
+- What is the best way to implement the auth, resources, and tools modules to maintain consistency with the established patterns?

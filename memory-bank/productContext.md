@@ -68,6 +68,12 @@ This architecture is implemented using dependency injection with factory functio
 
 For detailed guidelines on implementing this pattern, see `memory-bank/systemPatterns.md`.
 
+## MCP Server Architecture (MANDATORY)
+
+The MCP server implementation follows a modular architecture with clear separation of concerns that **MUST** be followed for all MCP components:
+
+For detailed guidelines on implementing this pattern, see `memory-bank/systemPatterns.md`.
+
 ## Project Structure
 
 ```
@@ -80,6 +86,10 @@ mcp-cm360/
 │   │   └── services/    # Business logic services
 │   ├── config/          # Configuration files
 │   ├── mcp/             # MCP SDK implementation
+│   │   ├── client.ts    # MCP client
+│   │   ├── mcpServer.ts # MCP server
+│   │   ├── types.ts     # Type definitions
+│   │   └── utils.ts     # Utility functions
 │   ├── server.ts        # Server entry point
 │   └── app.ts           # Express application setup
 ├── tests/               # Test files
@@ -111,7 +121,6 @@ The following environment variables are required:
 - `MCP_API_BASE_URL`: Base URL for MCP API
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google service account key file
 - `CM360_PROFILE_ID`: Campaign Manager 360 profile ID
-- `CM360_ACCOUNT_ID`: Campaign Manager 360 account ID
 
 ## Memory Bank Files
 
@@ -122,14 +131,18 @@ The Memory Bank contains the following core files:
 3. **progress.md**: Work completed and next steps
 4. **decisionLog.md**: Key decisions and their rationale
 5. **systemPatterns.md**: Architectural patterns, design principles, and coding conventions
+6. **apiDevelopmentGuide.md**: Step-by-step guide for adding new API endpoints
+7. **codeReviewChecklist.md**: Checklist for verifying compliance with architecture patterns
 
 Additional files may be created as needed to document specific aspects of the project.
 
 ## Development Guidelines
 
 1. **Follow the API Architecture Pattern**: All API implementations MUST follow the layered architecture pattern described in `systemPatterns.md`.
-2. **Use Dependency Injection**: All components MUST use dependency injection to improve testability and maintainability.
-3. **Implement Proper Validation**: All API endpoints MUST validate input data using express-validator.
-4. **Handle Errors Consistently**: All components MUST follow the error handling strategy described in `systemPatterns.md`.
-5. **Write Tests**: All components MUST have corresponding unit tests.
-6. **Document Your Code**: All public APIs MUST be documented with JSDoc comments.
+2. **Follow the MCP Server Architecture Pattern**: All MCP components MUST follow the modular architecture pattern described in `systemPatterns.md`.
+3. **Use Dependency Injection**: All components MUST use dependency injection to improve testability and maintainability.
+4. **Implement Proper Validation**: All API endpoints MUST validate input data using express-validator.
+5. **Handle Errors Consistently**: All components MUST follow the error handling strategy described in `systemPatterns.md`.
+6. **Write Tests**: All components MUST have corresponding unit tests.
+7. **Document Your Code**: All public APIs MUST be documented with JSDoc comments.
+8. **Follow the Code Review Checklist**: All code changes MUST be reviewed against the checklist in `codeReviewChecklist.md`.

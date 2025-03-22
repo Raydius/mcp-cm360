@@ -30,13 +30,31 @@
   - Created apiDevelopmentGuide.md with step-by-step process and best practices
 - Refactored MCP Server implementation:
   - Restructured monolithic mcpServer.ts into modular components
-  - Created separate modules for authentication, resources, and tools
+  - Created directory structure for auth, resources, and tools modules
   - Implemented proper dependency injection pattern
   - Improved code organization and maintainability
   - Created clear interfaces and factory functions for each component
   - Ensured consistent error handling across all components
 
 ## Next Steps
+
+### MCP Server Modularization
+- [ ] Implement auth module in src/mcp/auth/ directory
+  - [ ] Create googleAuth.ts for Google JWT authentication
+  - [ ] Implement token caching and refresh mechanism
+  - [ ] Add proper error handling and logging
+- [ ] Implement resource modules in src/mcp/resources/ directory
+  - [ ] Create separate files for each resource type (account, campaign, report)
+  - [ ] Implement resource templates and handlers
+  - [ ] Add proper error handling and logging
+- [ ] Implement tool modules in src/mcp/tools/ directory
+  - [ ] Create separate files for each tool type
+  - [ ] Implement tool schemas and handlers
+  - [ ] Add proper error handling and logging
+- [ ] Update mcpServer.ts to use the new modular components
+  - [ ] Import and register resources from the resources directory
+  - [ ] Import and register tools from the tools directory
+  - [ ] Use the auth module for authentication
 
 ### API Architecture Enforcement
 - [x] Create a code review checklist for verifying compliance with the API architecture pattern
