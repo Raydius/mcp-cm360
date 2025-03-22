@@ -101,34 +101,5 @@ describe('CM360McpServer', () => {
     });
   });
   
-  describe('getAccessToken', () => {
-    it('should return cached token if valid', async () => {
-      // Set up a valid token
-      server['accessToken'] = 'cached-token';
-      server['tokenExpiry'] = Date.now() + 3600000; // Valid for 1 hour
-      
-      const token = await server['getAccessToken']();
-      
-      expect(token).toBe('cached-token');
-      expect(server['googleAuth'].getClient).not.toHaveBeenCalled();
-    });
-    
-    it('should get a new token if expired', async () => {
-      // Set up an expired token
-      server['accessToken'] = 'expired-token';
-      server['tokenExpiry'] = Date.now() - 1000; // Expired
-      
-      const token = await server['getAccessToken']();
-      
-      expect(token).toBe('mock-access-token');
-      expect(server['googleAuth'].getClient).toHaveBeenCalled();
-    });
-    
-    it('should handle token retrieval errors', async () => {
-      // Mock token retrieval error
-      server['googleAuth'].getClient = jest.fn().mockRejectedValue(new Error('Token error'));
-      
-      await expect(server['getAccessToken']()).rejects.toThrow('Token error');
-    });
-  });
+  // Note: Authentication tests have been moved to tests/api/services/googleAuthService.test.ts
 });

@@ -9,6 +9,7 @@ jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
       tool: jest.fn(),
       connect: jest.fn().mockResolvedValue(undefined),
     })),
+    ResourceTemplate: jest.fn().mockImplementation((template) => template),
   };
 });
 
