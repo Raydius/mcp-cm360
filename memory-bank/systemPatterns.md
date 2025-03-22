@@ -15,42 +15,13 @@ The core of this project is the implementation of the Model Context Protocol (MC
 
 Implementation: `src/mcp/mcpServer.ts`
 
-### MCP Server Modular Architecture (MANDATORY)
-
-The MCP server implementation **MUST** follow a modular architecture with clear separation of concerns:
-
-1. **Core Server** (`src/mcp/mcpServer.ts`):
-   - Initializes the MCP server
-   - Registers resources and tools
-   - Connects to transports (stdio, SSE)
-   - **MUST** use dependency injection for services
-   - **MUST** delegate implementation details to specialized modules
-
-2. **Authentication Module** (`src/mcp/auth/`):
-   - Handles authentication with Google APIs
-   - Manages token caching and refresh
-   - Provides access tokens to other modules
-   - **MUST** implement proper error handling and logging
-
-3. **Resource Modules** (`src/mcp/resources/`):
-   - Define resource templates
-   - Implement resource handlers
-   - Format resource responses
-   - **MUST** follow consistent error handling patterns
-   - **MUST** use dependency injection for services
-
-4. **Tool Modules** (`src/mcp/tools/`):
-   - Define tool schemas
-   - Implement tool handlers
-   - Format tool responses
-   - **MUST** follow consistent error handling patterns
-   - **MUST** use dependency injection for services
+### MCP Server Modular Architecture 
 
 The flow of control **MUST** follow this path:
 - MCP Request → McpServer → Resource/Tool Module → Service → External API
 - External API → Service → Resource/Tool Module → McpServer → MCP Response
 
-### REST API Layer
+### REST API Layer (MANDATORY)
 
 The project includes a REST API layer built with Express.js that:
 
@@ -220,32 +191,3 @@ When adding new API endpoints, you **MUST** follow these steps:
 
 Failure to follow this pattern will result in code that is inconsistent with the rest of the application and may be rejected during code review.
 
-## Adding New MCP Resources and Tools (MANDATORY)
-
-When adding new MCP resources or tools, you **MUST** follow these steps:
-
-1. **Create Resource Module** (for resources):
-   - Create a new file in `src/mcp/resources/` named after your resource
-   - Define the resource template
-   - Implement the resource handler
-   - Follow consistent error handling patterns
-   - Use dependency injection for services
-
-2. **Create Tool Module** (for tools):
-   - Create a new file in `src/mcp/tools/` named after your tool
-   - Define the tool schema using Zod
-   - Implement the tool handler
-   - Follow consistent error handling patterns
-   - Use dependency injection for services
-
-3. **Register in MCP Server**:
-   - Import the resource or tool module in `src/mcp/mcpServer.ts`
-   - Register the resource or tool in the appropriate method
-   - Follow the existing pattern for registration
-
-4. **Add Tests**:
-   - Add unit tests for the new resource or tool
-   - Update integration tests to include the new resource or tool
-   - Follow the existing pattern for testing
-
-Failure to follow this pattern will result in code that is inconsistent with the rest of the application and may be rejected during code review.
