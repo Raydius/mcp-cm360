@@ -311,8 +311,7 @@ export class CM360McpServer {
               name,
               advertiserId,
               startDate,
-              endDate,
-              accountId: config.CM360_ACCOUNT_ID,
+              endDate
             },
             {
               headers: {
