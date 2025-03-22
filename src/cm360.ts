@@ -15,7 +15,7 @@ config();
 // environment variables validation schema
 const envSchema = z.object({
 	GOOGLE_APPLICATION_CREDENTIALS: z.string(),
-	CM360_PROFILE_ID: z.number().int(),
+	CM360_PROFILE_ID: z.string(),
 	NODE_ENV: z.enum(["development", "production"]).optional().default("production"),
 });
 
@@ -28,7 +28,7 @@ const keys = require(env.GOOGLE_APPLICATION_CREDENTIALS);
 // auth
 const client = new JWT({
 	keyFile: env.GOOGLE_APPLICATION_CREDENTIALS,
-	email: keys.client.email,
+	email: keys.client_email,
 	key: keys.private_key,
 	scopes: ["https://www.googleapis.com/auth/dfatrafficking"],
 });

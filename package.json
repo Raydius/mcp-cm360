@@ -4,8 +4,8 @@
   "description": "MCP Server that implements API for Google Campaign Manager 360 (CM360)",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node build/server.js",
+    "build": "tsc && chmod +x build/index.js",
+    "start": "node build/index.js",
     "lint": "eslint . --ext .ts",
     "test": "jest"
   },

@@ -1,6 +1,7 @@
+#!/usr/bin/env node
 /**
  * MCP Server that implements CM360 Rest API
- * 
+ *
  * @author Ray Dollete <rjdollete@gmail.com>
  */
 
