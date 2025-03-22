@@ -15,12 +15,7 @@
   - TEMPLATES.md with template code for each layer
   - codeReviewChecklist.md for verifying compliance with the pattern
   - apiDevelopmentGuide.md with step-by-step process and best practices
-- Refactored the MCP server implementation:
-  - Split monolithic mcpServer.ts into modular components
-  - Created separate modules for authentication, resources, and tools
-  - Implemented proper dependency injection pattern
-  - Improved code organization and maintainability
-  - Created clear interfaces and factory functions for each component
+
 
 ## Current Goals
 - Ensure all current and future code strictly adheres to the established architecture patterns
