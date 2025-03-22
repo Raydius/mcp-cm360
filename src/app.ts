@@ -45,6 +45,18 @@ export function createApp(): Application {
   // API routes
   app.use('/api/v1/examples', exampleRoutes);
 
+  // We'll add the 404 handler and error handler in finalizeApp
+  // to allow adding routes after app creation
+
+  return app;
+}
+
+/**
+ * Finalizes the Express application by adding the 404 handler and error handler
+ * @param app - The Express application to finalize
+ * @returns The finalized Express application
+ */
+export function finalizeApp(app: Application): Application {
   // 404 handler for undefined routes
   app.use((req: Request, res: Response) => {
     res.status(404).json({
@@ -65,6 +77,6 @@ export function createApp(): Application {
 /**
  * Create the Express application
  */
-const app = createApp();
+const app = finalizeApp(createApp());
 
 export default app;

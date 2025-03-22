@@ -1,9 +1,9 @@
-import app from './app';
 import config, { validateEnvironment } from './config/environment';
 import { logger } from './config/logger';
 import { createMCPClient } from './mcp/client';
 import { createCM360McpServer } from './mcp/mcpServer';
-import express from 'express';
+import express, { Request, Response } from 'express';
+import { createApp, finalizeApp } from './app';
 
 /**
  * Initialize the MCP client
@@ -27,6 +27,9 @@ async function startServer() {
     // Initialize MCP client
     const mcpClient = initializeMCPClient();
 
+    // Create the Express application (without 404 handler yet)
+    const app = createApp();
+    
     // Make MCP client available to the application
     app.locals.mcpClient = mcpClient;
     
@@ -34,7 +37,7 @@ async function startServer() {
     const cm360McpServer = createCM360McpServer();
 
     // Set up SSE endpoint for MCP server
-    app.get('/mcp/sse', async (req, res) => {
+    app.get('/mcp/sse', async (req: Request, res: Response) => {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
@@ -44,9 +47,12 @@ async function startServer() {
     });
 
     // Set up message endpoint for MCP server
-    app.post('/mcp/messages', express.json(), async (req, res) => {
+    app.post('/mcp/messages', express.json(), async (req: Request, res: Response) => {
       await cm360McpServer.handleMessage(req, res);
     });
+    
+    // Finalize the app by adding the 404 handler and error handler
+    finalizeApp(app);
     
     // Start the server
     const server = app.listen(config.PORT, () => {
@@ -103,4 +109,5 @@ if (require.main === module) {
   startServer();
 }
 
-export default app;
+// We don't export app directly anymore since it's created inside startServer
+export { createApp };
