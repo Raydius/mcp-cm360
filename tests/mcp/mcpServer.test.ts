@@ -1,6 +1,6 @@
 import { CM360McpServer } from '../../src/mcp/mcpServer';
 import axios from 'axios';
-import { OAuth2Client } from 'google-auth-library';
+import { GoogleAuth, JWT } from 'google-auth-library';
 
 // Mock dependencies
 jest.mock('axios');
@@ -41,17 +41,18 @@ describe('CM360McpServer', () => {
   let server: CM360McpServer;
   
   beforeEach(() => {
-    // Mock OAuth2Client implementation
-    (OAuth2Client as unknown as jest.Mock).mockImplementation(() => {
+    // Mock GoogleAuth implementation
+    (GoogleAuth as unknown as jest.Mock).mockImplementation(() => {
       return {
-        setCredentials: jest.fn(),
-        getAccessToken: jest.fn().mockResolvedValue({
-          token: 'mock-access-token',
-          res: {
-            data: {
-              expires_in: 3600,
+        getClient: jest.fn().mockResolvedValue({
+          getAccessToken: jest.fn().mockResolvedValue({
+            token: 'mock-access-token',
+            res: {
+              data: {
+                expires_in: 3600,
+              },
             },
-          },
+          }),
         }),
       };
     });
@@ -109,7 +110,7 @@ describe('CM360McpServer', () => {
       const token = await server['getAccessToken']();
       
       expect(token).toBe('cached-token');
-      expect(server['googleAuth'].getAccessToken).not.toHaveBeenCalled();
+      expect(server['googleAuth'].getClient).not.toHaveBeenCalled();
     });
     
     it('should get a new token if expired', async () => {
@@ -120,12 +121,12 @@ describe('CM360McpServer', () => {
       const token = await server['getAccessToken']();
       
       expect(token).toBe('mock-access-token');
-      expect(server['googleAuth'].getAccessToken).toHaveBeenCalled();
+      expect(server['googleAuth'].getClient).toHaveBeenCalled();
     });
     
     it('should handle token retrieval errors', async () => {
       // Mock token retrieval error
-      server['googleAuth'].getAccessToken = jest.fn().mockRejectedValue(new Error('Token error'));
+      server['googleAuth'].getClient = jest.fn().mockRejectedValue(new Error('Token error'));
       
       await expect(server['getAccessToken']()).rejects.toThrow('Token error');
     });

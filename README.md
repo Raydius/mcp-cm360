@@ -13,7 +13,7 @@ A TypeScript and Node.js implementation of the Model Context Protocol (MCP) serv
 - **Logging**: Configured Winston logger for different environments
 - **Testing**: Jest test setup for independent API testing
 - **Environment Management**: Proper environment variable configuration
-- **OAuth Authentication**: Google OAuth 2.0 authentication for CM360 API
+- **JWT Authentication**: Google JWT authentication for CM360 API
 
 ## Project Structure
 
@@ -67,19 +67,20 @@ To use the Campaign Manager 360 MCP Server, you need to set up Google API creden
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
 3. Enable the Campaign Manager 360 API (also known as DCM/DFA Reporting and Trafficking API)
-4. Create OAuth 2.0 credentials:
+4. Create a Service Account:
    - Go to "APIs & Services" > "Credentials"
-   - Click "Create Credentials" > "OAuth client ID"
-   - Select "Web application" as the application type
-   - Add authorized redirect URIs (e.g., http://localhost:3000/oauth/callback)
-   - Copy the Client ID and Client Secret to your `.env` file
+   - Click "Create Credentials" > "Service Account"
+   - Fill in the service account details and click "Create"
+   - Grant the service account the necessary roles (e.g., "Campaign Manager 360 API User")
+   - Click "Done"
 
-5. Get a refresh token:
-   - Use the Google OAuth 2.0 flow to get a refresh token
-   - You can use a tool like [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)
-   - Select the "DCM/DFA Reporting and Trafficking API v4" scope
-   - Authorize the API and exchange the authorization code for tokens
-   - Copy the refresh token to your `.env` file
+5. Create a Service Account Key:
+   - Find your service account in the list and click on it
+   - Go to the "Keys" tab
+   - Click "Add Key" > "Create new key"
+   - Select "JSON" as the key type and click "Create"
+   - The key file will be downloaded to your computer
+   - Store this file securely and set the path to this file in your `.env` file as GOOGLE_APPLICATION_CREDENTIALS
 
 6. Get your CM360 Profile ID and Account ID:
    - You can find these in the Campaign Manager 360 UI

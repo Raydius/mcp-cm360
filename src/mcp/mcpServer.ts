@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { logger } from '../config/logger';
 import config from '../config/environment';
 import axios from 'axios';
-import { OAuth2Client } from 'google-auth-library';
+import { GoogleAuth, JWT } from 'google-auth-library';
 
 /**
  * CM360 MCP Server
@@ -13,7 +13,8 @@ import { OAuth2Client } from 'google-auth-library';
  */
 export class CM360McpServer {
   private server: McpServer;
-  private googleAuth: OAuth2Client;
+  private googleAuth: GoogleAuth;
+  private jwtClient: JWT | null = null;
   private accessToken: string | null = null;
   private tokenExpiry: number = 0;
 
@@ -27,15 +28,12 @@ export class CM360McpServer {
       version: '1.0.0',
     });
 
-    // Initialize Google OAuth client
-    this.googleAuth = new OAuth2Client(
-      config.GOOGLE_CLIENT_ID,
-      config.GOOGLE_CLIENT_SECRET
-    );
-
-    // Set refresh token
-    this.googleAuth.setCredentials({
-      refresh_token: config.GOOGLE_REFRESH_TOKEN,
+    // Initialize Google Auth client
+    this.googleAuth = new GoogleAuth({
+      scopes: [
+        'https://www.googleapis.com/auth/dfareporting',
+        'https://www.googleapis.com/auth/dfatrafficking'
+      ]
     });
 
     // Register resources and tools
@@ -420,18 +418,23 @@ export class CM360McpServer {
     }
     
     try {
-      // Get a new token
-      const response = await this.googleAuth.getAccessToken();
+      // Initialize JWT client if not already done
+      if (!this.jwtClient) {
+        this.jwtClient = await this.googleAuth.getClient() as JWT;
+      }
       
-      if (!response.token) {
+      // Get a new token
+      const token = await this.jwtClient.getAccessToken();
+      
+      if (!token || !token.token) {
         throw new Error('Failed to get access token');
       }
       
-      this.accessToken = response.token;
+      this.accessToken = token.token;
       
       // Set expiry (default to 1 hour if not provided)
-      if (response.res && response.res.data && response.res.data.expires_in) {
-        this.tokenExpiry = now + (response.res.data.expires_in * 1000);
+      if (token.res && token.res.data && token.res.data.expires_in) {
+        this.tokenExpiry = now + (token.res.data.expires_in * 1000);
       } else {
         this.tokenExpiry = now + 3600000; // 1 hour
       }

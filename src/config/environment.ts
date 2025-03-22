@@ -21,9 +21,7 @@ const config = {
   MCP_REQUEST_TIMEOUT: parseInt(process.env.MCP_REQUEST_TIMEOUT || '10000', 10),
   
   // Google Campaign Manager 360 API configuration
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
-  GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN || '',
+  GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
   CM360_PROFILE_ID: process.env.CM360_PROFILE_ID || '',
   CM360_ACCOUNT_ID: process.env.CM360_ACCOUNT_ID || '',
   
@@ -39,9 +37,7 @@ export function validateEnvironment(): void {
   const requiredVariables = [
     'MCP_API_KEY',
     'MCP_API_BASE_URL',
-    'GOOGLE_CLIENT_ID',
-    'GOOGLE_CLIENT_SECRET',
-    'GOOGLE_REFRESH_TOKEN',
+    'GOOGLE_APPLICATION_CREDENTIALS',
     'CM360_PROFILE_ID',
     'CM360_ACCOUNT_ID'
   ];
