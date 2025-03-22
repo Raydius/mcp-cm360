@@ -1,8 +1,7 @@
 import config, { validateEnvironment } from './config/environment';
 import { logger } from './config/logger';
 import { createMCPClient } from './mcp/client';
-import { createCM360McpServer } from './mcp/mcpServer';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import { createApp, finalizeApp } from './app';
 
 /**
@@ -33,37 +32,22 @@ async function startServer() {
     // Make MCP client available to the application
     app.locals.mcpClient = mcpClient;
     
-    // Initialize CM360 MCP Server
-    const cm360McpServer = createCM360McpServer();
-
-    // Set up SSE endpoint for MCP server
-    app.get('/mcp/sse', async (req: Request, res: Response) => {
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      
-      // Connect the MCP server to the SSE transport
-      await cm360McpServer.connectSSE(res, '/mcp/messages');
-    });
-
-    // Set up message endpoint for MCP server
-    app.post('/mcp/messages', express.json(), async (req: Request, res: Response) => {
-      await cm360McpServer.handleMessage(req, res);
-    });
-    
     // Finalize the app by adding the 404 handler and error handler
     finalizeApp(app);
     
     // Start the server
     const server = app.listen(config.PORT, () => {
       logger.info(`Server running in ${config.NODE_ENV} mode on port ${config.PORT}`);
-      logger.info(`MCP Server available at http://localhost:${config.PORT}/mcp/sse`);
+      logger.info(`MCP Server available at http://localhost:${config.PORT}/mcp/events`);
       
       // Start the stdio MCP server if running in development mode
       if (config.NODE_ENV === 'development') {
-        cm360McpServer.connectStdio().catch(error => {
-          logger.error('Failed to start stdio MCP server', { error });
-        });
+        const mcpServer = app.locals.mcpServer;
+        if (mcpServer) {
+          mcpServer.connectStdio().catch((error: Error) => {
+            logger.error('Failed to start stdio MCP server', { error });
+          });
+        }
       }
     });
 
