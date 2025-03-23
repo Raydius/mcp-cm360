@@ -46,7 +46,7 @@ const ListAdvertisersSchema = z.object({
 const ListCampaignsSchema = z.object({
 	advertiserIds: z.number().array().optional(),
 	searchString: z.string().optional().default(""),
-	maxResults: z.number().optional().default(10),
+	maxResults: z.number().optional().default(2),
 	//sortField: z.enum(["ID", "NAME"]).optional().default("NAME"),
 	//sortOrder: z.enum(["ASCENDING", "DESCENDING"]).optional().default("ASCENDING")
 });
@@ -138,7 +138,7 @@ export const cm360 = {
 							maxResults: {
 								type: "number",
 								description: "Maximum number of results",
-								default: 10
+								default: 2
 							}
 						},
 						required: []
