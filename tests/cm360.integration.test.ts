@@ -18,7 +18,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Log the current environment variables for debugging
+// Log the environment variables for debugging
 console.log('Environment variables for integration tests:');
 console.log(`- GOOGLE_APPLICATION_CREDENTIALS: ${process.env.GOOGLE_APPLICATION_CREDENTIALS || 'not set'}`);
 console.log(`- CM360_PROFILE_ID: ${process.env.CM360_PROFILE_ID || 'not set'}`);
@@ -42,8 +42,8 @@ const checkCredentials = () => {
     }
     
     // Resolve relative paths if needed
-    const resolvedCredentialsPath = credentialsPath.startsWith('/')
-      ? credentialsPath
+    const resolvedCredentialsPath = credentialsPath.startsWith('/') 
+      ? credentialsPath 
       : path.resolve(process.cwd(), credentialsPath);
     
     // Check if credentials file exists
@@ -70,6 +70,20 @@ if (!credentialStatus.valid) {
   console.log(`\n\x1b[33mSkipping CM360 API Integration Tests: ${credentialStatus.reason}\x1b[0m\n`);
 }
 
+// Import the original console methods for direct logging
+import { originalConsole } from './setup';
+
+// Function to log API requests for debugging
+const logApiRequest = (options: any) => {
+  // Use the original console.log to bypass Jest's console capture
+  originalConsole.log('\n===== API REQUEST =====');
+  originalConsole.log(`URL: ${options.url}`);
+  originalConsole.log(`Method: ${options.method}`);
+  originalConsole.log('Parameters:');
+  originalConsole.log(JSON.stringify(options.params, null, 2));
+  originalConsole.log('======================\n');
+};
+
 // Only run these tests if credentials are available
 (credentialStatus.valid ? describe : describe.skip)('CM360 API Integration Tests', () => {
   // Set longer timeout for API calls
@@ -79,6 +93,9 @@ if (!credentialStatus.valid) {
   beforeEach(() => {
     // Mock for advertisers
     mockJwtRequest.mockImplementation((options) => {
+      // Log the API request
+      logApiRequest(options);
+      
       if (options.url.includes('/advertisers')) {
         return Promise.resolve({
           data: {
@@ -163,6 +180,9 @@ if (!credentialStatus.valid) {
   it('should filter campaigns by advertiser ID if provided', async () => {
     // Create a special mock for this test
     mockJwtRequest.mockImplementationOnce((options) => {
+      // Log the API request
+      logApiRequest(options);
+      
       if (options.url.includes('/campaigns')) {
         // Check that the advertiserIds parameter is passed correctly
         // The params object should have advertiserIds: [123]
@@ -203,6 +223,9 @@ if (!credentialStatus.valid) {
   it('should handle pagination correctly for large result sets', async () => {
     // Override the mock for this test to include pagination
     mockJwtRequest.mockImplementationOnce((options) => {
+      // Log the API request for the first page
+      logApiRequest(options);
+      
       return Promise.resolve({
         data: {
           advertisers: [
@@ -213,6 +236,9 @@ if (!credentialStatus.valid) {
         }
       });
     }).mockImplementationOnce((options) => {
+      // Log the API request for the second page
+      logApiRequest(options);
+      
       return Promise.resolve({
         data: {
           advertisers: [

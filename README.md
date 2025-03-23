@@ -74,6 +74,30 @@ To run integration tests that make actual API calls to the CM360 API:
 npm run test:integration
 ```
 
+To see detailed output from the API calls, run:
+
+```bash
+npm run test:integration:verbose
+```
+
+This will show the actual API requests being made, including:
+- The URL being called
+- The HTTP method
+- The parameters being sent
+
+Example output:
+```
+===== API REQUEST =====
+URL: https://dfareporting.googleapis.com/v4/userprofiles/12345/advertisers
+Method: GET
+Parameters:
+{
+  "searchString": "",
+  "maxResults": 5
+}
+======================
+```
+
 Note: Integration tests will be skipped if valid credentials are not available. When tests are skipped, you'll see output like:
 
 ```
@@ -106,6 +130,73 @@ npm test -- -t "should handle pagination"
 
 # Run tests with increased verbosity
 npm test -- --verbose
+```
+
+### Running Real API Tests
+
+There are two ways to run tests that make actual API calls to the CM360 API:
+
+#### 1. Using Jest
+
+```bash
+npm run test:real
+```
+
+These tests will:
+1. Make real API calls to the CM360 API using your credentials
+2. Display the actual API responses
+3. Verify that the responses have the expected structure
+
+Note: These tests will only run if you have valid credentials in your .env file. They will be skipped otherwise.
+
+#### 2. Using a Standalone Script
+
+For a more direct approach without Jest's test framework:
+
+```bash
+npm run api:test
+```
+
+This script:
+1. Builds the project first to ensure the latest code is used
+2. Makes real API calls to the CM360 API using your credentials
+3. Displays the actual API responses in a formatted JSON output
+4. Doesn't require any test mocks or frameworks
+
+Example output:
+```
+===== CM360 REAL API TEST =====
+GOOGLE_APPLICATION_CREDENTIALS: /path/to/your/service-account-key.json
+CM360_PROFILE_ID: 9661777
+===============================
+
+Fetching advertisers...
+
+===== ADVERTISERS =====
+[
+  {
+    "id": 123456,
+    "name": "Example Advertiser",
+    "status": "APPROVED"
+  },
+  ...
+]
+======================
+
+Fetching campaigns...
+
+===== CAMPAIGNS =====
+[
+  {
+    "id": 789012,
+    "name": "Example Campaign",
+    "advertiserId": 123456
+  },
+  ...
+]
+======================
+
+All tests completed successfully!
 ```
 
 ## Available Tools

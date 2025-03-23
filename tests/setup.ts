@@ -102,7 +102,7 @@ class TestLogger {
 export const testLogger = new TestLogger();
 
 // Store original console methods
-const originalConsole = {
+export const originalConsole = {
   log: console.log,
   info: console.info,
   warn: console.warn,
