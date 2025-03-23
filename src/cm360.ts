@@ -1,7 +1,7 @@
 /**
  * CM360 API Module
  * 
- * I have so far focused on read-only tools to prevent any accidental changes to ad trafficking
+ * Interface for CM360 API with only read-only methods to prevent any accidental changes to ad trafficking
  * 
  * @author Ray Dollete <rjdollete@gmail.com>
  */
@@ -38,17 +38,25 @@ const client = new JWT({
 // base URL for CM360 API v4
 const baseUrl = `https://dfareporting.googleapis.com/dfareporting/v4/userprofiles/${env.CM360_PROFILE_ID}`;
 
-// Define schema outside the object for proper type inference
+// Define schemas outside the object for proper type inference
 const ListAdvertisersSchema = z.object({
 	searchString: z.string().optional().default(""),
 	maxResults: z.number().optional().default(10)
 });
+const ListCampaignsSchema = z.object({
+	advertiserIds: z.number().array().optional(),
+	searchString: z.string().optional().default(""),
+	maxResults: z.number().optional().default(10),
+	//sortField: z.enum(["ID", "NAME"]).optional().default("NAME"),
+	//sortOrder: z.enum(["ASCENDING", "DESCENDING"]).optional().default("ASCENDING")
+});
+
+
+// Define types for cm360 method arguments
+// type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
 
 // Define types for paginatedRequest function
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-
-// Define types for cm360 method arguments
-export type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
 
 // Define interface for CM360 API response
 interface CM360Response {
@@ -70,7 +78,7 @@ interface McpResponse {
 // Main CM360 API module
 export const cm360 = {
 	// type definitions
-	ListAdvertisersSchema,
+	//ListAdvertisersSchema,
 
 	// tool definitions
 	tools: async () => {
@@ -116,9 +124,21 @@ export const cm360 = {
 					inputSchema: {
 						type: "object",
 						properties: {
-							advertiserId: {
+							advertiserIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "ID of Advertiser you want to filter campaigns by"
+							},
+							searchString: {
+								type: "string",
+								description: "Search query for campaign name"
+							},
+							maxResults: {
 								type: "number",
-								description: "ID of Advertiser you want to filter campaigns by
+								description: "Maximum number of results",
+								default: 10
 							}
 						},
 						required: []
@@ -130,32 +150,26 @@ export const cm360 = {
 
 	// handler to list all advertisers on the account
 	handleListAdvertisers: async (args?: Record<string, unknown>): Promise<McpResponse> => {
-		// Parse arguments with zod schema
 		const parsedArgs = ListAdvertisersSchema.parse(args || {});
-		const searchString = parsedArgs.searchString;
-		const maxResults = parsedArgs.maxResults;
-		
 		const url = `${baseUrl}/advertisers`;
-		const advertisers = await paginatedRequest ( url, parsedArgs, "GET", "advertisers" );
-
+		const advertisers = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
 		console.error(`Successfully retrieved ${advertisers.length} advertisers`);
-
-		// Return in the format expected by MCP
-		return {
-			content: [{
-				type: "text",
-				text: JSON.stringify(advertisers.slice(0, maxResults), null, 2)
-			}]
-		};
-
-	}, // end handleListAdvertisers
-
-
+		return mcpReturnJSON(advertisers);
+	}, 
 
 	/*
 	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
 
 	}, // end handleSelectAdvertiser*/
+
+	handleListCampaigns: async (args?: Record<string, unknown>): Promise<McpResponse> => {
+		const parsedArgs = ListCampaignsSchema.parse(args || {});
+		const url = `${baseUrl}/campaigns`;
+		const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
+		console.error(`Successfully retrieved ${campaigns.length} campaigns`);
+		return mcpReturnJSON(campaigns);
+	}
+	
 };
 
 
@@ -188,7 +202,7 @@ const paginatedRequest = async (
 				url,
 				method,
 				params,
-				timeout: 5000 // 5 second timeout per page
+				timeout: 30000 // 30 second timeout per page
 			});
 			const data = res.data as CM360Response;
 
@@ -221,4 +235,14 @@ const paginatedRequest = async (
 		// Rethrow the error to be handled by the calling function
 		throw err;
 	}
+};
+
+// Return in the format expected by MCP
+const mcpReturnJSON = (data: any) => {
+	return {
+		content: [{
+			type: "text",
+			text: JSON.stringify(data, null, 2)
+		}]
+	};
 };
