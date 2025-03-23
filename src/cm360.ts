@@ -48,7 +48,8 @@ export type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
 
 // Define interface for CM360 API response
 interface CM360Response {
-	advertisers: any[];
+	advertisers?: any[];
+	campaigns?: any[];
 	nextPageToken?: string;
 }
 
@@ -88,11 +89,25 @@ export const cm360 = {
 						},
 						required: [],
 					},
+				},
+				{
+					name: "select-advertiser",
+					description: "Select advertiser to use for subsequent interactions",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserId: {
+								type: "number",
+								description: "ID of Advertiser to select",
+							}
+						}
+					}
 				}
 			]
 		};
 	},
 
+	// handler to list all advertisers on the account
 	handleListAdvertisers: async (args?: Record<string, unknown>): Promise<McpResponse> => {
 		// Parse arguments with zod schema
 		const parsedArgs = ListAdvertisersSchema.parse(args || {});
@@ -102,6 +117,9 @@ export const cm360 = {
 		const url = `${baseUrl}/advertisers`;
 
 		try {
+
+			const advertisers = await paginatedRequest ( url, parsedsArgs, "LIST", "advertisers" );
+			/*
 			// set initial values for paging
 			let pageToken = '';
 			let isLastPage = false;
@@ -142,7 +160,7 @@ export const cm360 = {
 				}
 			}
 			while (!isLastPage);
-
+			*/
 			console.error(`Successfully retrieved ${advertisers.length} advertisers`);
 
 			// Return in the format expected by MCP
@@ -172,5 +190,75 @@ export const cm360 = {
 				isError: true
 			};
 		}
+	}, // end handleListAdvertisers
+
+	/*
+	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
+
+	}, // end handleSelectAdvertiser*/
+};
+
+// handler for serial API requests due to pagination
+const paginatedRequest = async ( url, baseParams, method, valueArrayKey ) => {
+
+	try {
+		// set initial values for paging
+		let pageToken = '';
+		let isLastPage = false;
+
+		// init array for return values
+		const valueArray: any[] = [];
+
+		do {
+			// include a pagetoken (if this is not the first iteration) in addition to the other base parameters
+			const params: Record<string, any> = (pageToken) ? {
+				pageToken, ...baseParams } : { ...baseParams };
+			
+			// Add debugging
+			console.error(`Sending request to ${url} with params:`, params);
+
+			// Send the request to the API with timeout
+			const res = await client.request({
+				url,
+				method,
+				params,
+				timeout: 5000 // 5 second timeout per page
+			});
+			const data = res.data as CM360Response;
+
+			// Extract values from the response and add them to the array
+			if (data[valueArrayKey] && Array.isArray(data[valueArrayKey])) {
+				valueArray.push(...data[valueArrayKey]);
+			}
+
+			// Check for next page
+			pageToken = data.nextPageToken || '';
+
+			if (!data[valueArrayKey] || data[valueArrayKey].length === 0 || !pageToken) {
+				isLastPage = true;
+			}			
+		}
+		while (!isLastPage);
+
+		return valueArray;
+	}
+	catch (err) {
+		// Log detailed error information
+		console.error("Error in paginatedRequest:");
+		if (err instanceof Error) {
+			console.error(`- Message: ${err.message}`);
+			console.error(`- Stack: ${err.stack}`);
+		} else {
+			console.error(`- Non-Error object: ${String(err)}`);
+		}
+		
+		// Return error response
+		return {
+			content: [{
+				type: "text",
+				text: `Error fetching advertisers: ${err instanceof Error ? err.message : String(err)}`
+			}],
+			isError: true
+		};
 	}
 };
