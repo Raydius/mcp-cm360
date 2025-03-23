@@ -134,25 +134,6 @@ npm test -- --verbose
 
 ### Running Real API Tests
 
-There are two ways to run tests that make actual API calls to the CM360 API:
-
-#### 1. Using Jest
-
-```bash
-npm run test:real
-```
-
-These tests will:
-1. Make real API calls to the CM360 API using your credentials
-2. Display the actual API responses
-3. Verify that the responses have the expected structure
-
-Note: These tests will only run if you have valid credentials in your .env file. They will be skipped otherwise.
-
-#### 2. Using a Standalone Script
-
-For a more direct approach without Jest's test framework:
-
 ```bash
 npm run api:test
 ```

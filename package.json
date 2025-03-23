@@ -11,7 +11,6 @@
     "test:unit": "jest --testPathIgnorePatterns=integration",
     "test:integration": "jest tests/cm360.integration.test.ts",
     "test:integration:verbose": "jest tests/cm360.integration.test.ts --verbose",
-    "test:real": "jest tests/cm360.real.test.ts --verbose",
     "api:test": "npm run build && node real-api-test.js"
   },
   "author": "",
