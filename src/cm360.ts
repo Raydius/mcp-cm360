@@ -27,7 +27,7 @@ const env = envSchema.parse(process.env);
 // objectify key file
 const keys = require(env.GOOGLE_APPLICATION_CREDENTIALS);
 
-// auth
+// Google API auth
 const client = new JWT({
 	keyFile: env.GOOGLE_APPLICATION_CREDENTIALS,
 	email: keys.client_email,
@@ -44,6 +44,10 @@ const ListAdvertisersSchema = z.object({
 	maxResults: z.number().optional().default(10)
 });
 
+// Define types for paginatedRequest function
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+// Define types for cm360 method arguments
 export type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
 
 // Define interface for CM360 API response
@@ -51,6 +55,7 @@ interface CM360Response {
 	advertisers?: any[];
 	campaigns?: any[];
 	nextPageToken?: string;
+	[key: string]: any; // Allow indexing with string keys
 }
 
 // Define MCP response type
@@ -62,6 +67,7 @@ interface McpResponse {
 	isError?: boolean;
 }
 
+// Main CM360 API module
 export const cm360 = {
 	// type definitions
 	ListAdvertisersSchema,
@@ -88,7 +94,7 @@ export const cm360 = {
 							}
 						},
 						required: [],
-					},
+					}
 				},
 				{
 					name: "select-advertiser",
@@ -100,7 +106,22 @@ export const cm360 = {
 								type: "number",
 								description: "ID of Advertiser to select",
 							}
-						}
+						},
+						required: []
+					}
+				},
+				{
+					name: "list-campaigns",
+					description: "List campaigns associated with the selected advertiser (or account if no advertiser selected)",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserId: {
+								type: "number",
+								description: "ID of Advertiser you want to filter campaigns by
+							}
+						},
+						required: []
 					}
 				}
 			]
@@ -115,82 +136,21 @@ export const cm360 = {
 		const maxResults = parsedArgs.maxResults;
 		
 		const url = `${baseUrl}/advertisers`;
+		const advertisers = await paginatedRequest ( url, parsedArgs, "GET", "advertisers" );
 
-		try {
+		console.error(`Successfully retrieved ${advertisers.length} advertisers`);
 
-			const advertisers = await paginatedRequest ( url, parsedsArgs, "LIST", "advertisers" );
-			/*
-			// set initial values for paging
-			let pageToken = '';
-			let isLastPage = false;
+		// Return in the format expected by MCP
+		return {
+			content: [{
+				type: "text",
+				text: JSON.stringify(advertisers.slice(0, maxResults), null, 2)
+			}]
+		};
 
-			const advertisers: any[] = [];
-
-			do {
-				// include a pagetoken if this is not the first iteration
-				const params: Record<string, any> = (pageToken) ? {
-					pageToken, maxResults: maxResults } : { maxResults: maxResults };
-				
-				// Add search string if provided
-				if (searchString) {
-					params.searchString = searchString;
-				}
-
-				// Add debugging
-				console.error(`Sending request to ${url} with params:`, params);
-				
-				// Send the request to the API with timeout
-				const res = await client.request({
-					url,
-					params,
-					timeout: 30000 // 30 second timeout
-				});
-				const data = res.data as CM360Response;
-
-				// Extract advertisers from the response and add them to the array
-				if (data.advertisers && Array.isArray(data.advertisers)) {
-					advertisers.push(...data.advertisers);
-				}
-
-				// Check for next page
-				pageToken = data.nextPageToken || '';
-
-				if (!data.advertisers || data.advertisers.length === 0 || !pageToken) {
-					isLastPage = true;
-				}
-			}
-			while (!isLastPage);
-			*/
-			console.error(`Successfully retrieved ${advertisers.length} advertisers`);
-
-			// Return in the format expected by MCP
-			return {
-				content: [{
-					type: "text",
-					text: JSON.stringify(advertisers.slice(0, maxResults), null, 2)
-				}]
-			};
-		}
-		catch (err) {
-			// Log detailed error information
-			console.error("Error in handleListAdvertisers:");
-			if (err instanceof Error) {
-				console.error(`- Message: ${err.message}`);
-				console.error(`- Stack: ${err.stack}`);
-			} else {
-				console.error(`- Non-Error object: ${String(err)}`);
-			}
-			
-			// Return error response
-			return {
-				content: [{
-					type: "text",
-					text: `Error fetching advertisers: ${err instanceof Error ? err.message : String(err)}`
-				}],
-				isError: true
-			};
-		}
 	}, // end handleListAdvertisers
+
+
 
 	/*
 	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
@@ -198,8 +158,14 @@ export const cm360 = {
 	}, // end handleSelectAdvertiser*/
 };
 
-// handler for serial API requests due to pagination
-const paginatedRequest = async ( url, baseParams, method, valueArrayKey ) => {
+
+// handler for serial API requests due to paginated results
+const paginatedRequest = async (
+  url: string,
+  baseParams: Record<string, any>,
+  method: HttpMethod,
+  valueArrayKey: string
+): Promise<any[]> => {
 
 	try {
 		// set initial values for paging
@@ -252,13 +218,7 @@ const paginatedRequest = async ( url, baseParams, method, valueArrayKey ) => {
 			console.error(`- Non-Error object: ${String(err)}`);
 		}
 		
-		// Return error response
-		return {
-			content: [{
-				type: "text",
-				text: `Error fetching advertisers: ${err instanceof Error ? err.message : String(err)}`
-			}],
-			isError: true
-		};
+		// Rethrow the error to be handled by the calling function
+		throw err;
 	}
 };
