@@ -40,20 +40,12 @@ const baseUrl = `https://dfareporting.googleapis.com/dfareporting/v4/userprofile
 
 // Define schemas outside the object for proper type inference
 const ListAdvertisersSchema = z.object({
-	searchString: z.string().optional().default(""),
-	maxResults: z.number().optional().default(10)
+	searchString: z.string().optional().default("")
 });
 const ListCampaignsSchema = z.object({
 	advertiserIds: z.number().array().optional(),
-	searchString: z.string().optional().default(""),
-	maxResults: z.number().optional().default(2),
-	//sortField: z.enum(["ID", "NAME"]).optional().default("NAME"),
-	//sortOrder: z.enum(["ASCENDING", "DESCENDING"]).optional().default("ASCENDING")
+	searchString: z.string().optional().default("")
 });
-
-
-// Define types for cm360 method arguments
-// type ListAdvertisersArgs = z.infer<typeof ListAdvertisersSchema>;
 
 // Define types for paginatedRequest function
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -94,11 +86,6 @@ export const cm360 = {
 								type: "string",
 								description: "Search query for advertiser name",
 								default: ""
-							},
-							maxResults: {
-								type: "number",
-								description: "Maximum number of results",
-								default: 10
 							}
 						},
 						required: [],
@@ -134,11 +121,6 @@ export const cm360 = {
 							searchString: {
 								type: "string",
 								description: "Search query for campaign name"
-							},
-							maxResults: {
-								type: "number",
-								description: "Maximum number of results",
-								default: 2
 							}
 						},
 						required: []
@@ -184,6 +166,7 @@ const paginatedRequest = async (
 	try {
 		// set initial values for paging
 		let pageToken = '';
+		let pageNumber = 1;
 		let isLastPage = false;
 
 		// init array for return values
@@ -202,7 +185,7 @@ const paginatedRequest = async (
 				url,
 				method,
 				params,
-				timeout: 30000 // 30 second timeout per page
+				timeout: 5000 // 5 second timeout per page
 			});
 			const data = res.data as CM360Response;
 
@@ -211,10 +194,14 @@ const paginatedRequest = async (
 				valueArray.push(...data[valueArrayKey]);
 			}
 
+			// increment page count
+			pageNumber++;
+
 			// Check for next page
 			pageToken = data.nextPageToken || '';
 
-			if (!data[valueArrayKey] || data[valueArrayKey].length === 0 || !pageToken) {
+			// stop if this is either the last page of results or the 10th page (whichever comes first)
+			if (!data[valueArrayKey] || data[valueArrayKey].length === 0 || !pageToken || pageNumber >= 10) {
 				isLastPage = true;
 			}			
 		}

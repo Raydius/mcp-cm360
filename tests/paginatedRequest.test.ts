@@ -31,7 +31,6 @@ describe('paginatedRequest', () => {
 			method: 'GET',
 			params: expect.objectContaining({
 				searchString: '',
-				maxResults: 10
 			})
 		}));
 		
@@ -84,7 +83,6 @@ describe('paginatedRequest', () => {
 			method: 'GET',
 			params: expect.objectContaining({
 				searchString: '',
-				maxResults: 10
 			})
 		}));
 		
@@ -94,7 +92,6 @@ describe('paginatedRequest', () => {
 			method: 'GET',
 			params: expect.objectContaining({
 				searchString: '',
-				maxResults: 10,
 				pageToken: 'next-page-token'
 			})
 		}));

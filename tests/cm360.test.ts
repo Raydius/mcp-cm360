@@ -31,7 +31,6 @@ describe('CM360 API Module', () => {
 				method: 'GET',
 				params: expect.objectContaining({
 					searchString: '',
-					maxResults: 10
 				})
 			}));
 			
@@ -65,7 +64,6 @@ describe('CM360 API Module', () => {
 			// Act
 			const result = await cm360.handleListAdvertisers({
 				searchString: 'Test',
-				maxResults: 5
 			});
 			
 			// Assert
@@ -74,7 +72,6 @@ describe('CM360 API Module', () => {
 				method: 'GET',
 				params: expect.objectContaining({
 					searchString: 'Test',
-					maxResults: 5
 				})
 			}));
 			
@@ -126,7 +123,6 @@ describe('CM360 API Module', () => {
 				method: 'GET',
 				params: expect.objectContaining({
 					searchString: '',
-					maxResults: 10
 				})
 			}));
 			
@@ -136,7 +132,6 @@ describe('CM360 API Module', () => {
 				method: 'GET',
 				params: expect.objectContaining({
 					searchString: '',
-					maxResults: 10,
 					pageToken: 'next-page-token'
 				})
 			}));
@@ -197,7 +192,6 @@ describe('CM360 API Module', () => {
 				method: 'GET',
 				params: expect.objectContaining({
 					searchString: '',
-					maxResults: 2
 				})
 			}));
 			
@@ -232,7 +226,6 @@ describe('CM360 API Module', () => {
 			const result = await cm360.handleListCampaigns({
 				advertiserIds: [1],
 				searchString: 'Campaign',
-				maxResults: 5
 			});
 			
 			// Assert
@@ -242,7 +235,6 @@ describe('CM360 API Module', () => {
 				params: expect.objectContaining({
 					advertiserIds: [1],
 					searchString: 'Campaign',
-					maxResults: 5
 				})
 			}));
 			
@@ -278,11 +270,6 @@ describe('CM360 API Module', () => {
 									type: 'string',
 									description: 'Search query for advertiser name',
 									default: ''
-								},
-								maxResults: {
-									type: 'number',
-									description: 'Maximum number of results',
-									default: 10
 								}
 							},
 							required: [],
@@ -318,11 +305,6 @@ describe('CM360 API Module', () => {
 								searchString: {
 									type: 'string',
 									description: 'Search query for campaign name'
-								},
-								maxResults: {
-									type: 'number',
-									description: 'Maximum number of results',
-									default: 2
 								}
 							},
 							required: []
