@@ -127,12 +127,17 @@ export const cm360 = {
 		return mcpReturnJSON(advertisers);
 	}, 
 
-	
+	// handler to select an advertiser
 	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
 		try {
 			const parsedArgs = SelectAdvertiserSchema.parse(args || {});
 			selectedAdvertiserId = parsedArgs.advertiserId;
-
+			return {
+				content: [{
+					type: "text",
+					text: "Advertiser selected successfully"
+				}]
+			};
 		}
 		catch (error) {
 			console.error('Failed to select advertiser', error);
@@ -141,6 +146,7 @@ export const cm360 = {
 		}
 	},
 
+	// handler for campaign listing
 	handleListCampaigns: async (args?: Record<string, unknown>): Promise<McpResponse> => {
 		const parsedArgs = ListCampaignsSchema.parse(args || {});
 
