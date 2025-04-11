@@ -33,6 +33,11 @@ const mockTools = jest.fn().mockResolvedValue({
 			inputSchema: {}
 		},
 		{
+			name: 'select-advertiser',
+			description: 'Select advertiser to use for subsequent interactions',
+			inputSchema: {}
+		},
+		{
 			name: 'list-campaigns',
 			description: 'List campaigns associated with the selected advertiser',
 			inputSchema: {}

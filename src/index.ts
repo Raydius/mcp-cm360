@@ -49,7 +49,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 			case "list-campaigns":
 				return await cm360.handleListCampaigns(request.params.arguments);
 			case "select-advertiser":
-				// return await cm360.handleSelectAdvertiser(request.params.arguments);
+				return await cm360.handleSelectAdvertiser(request.params.arguments);
 			default:
 				return {
 					content: [{

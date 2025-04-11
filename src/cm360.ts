@@ -9,17 +9,12 @@
 // auth dependencies
 import { JWT } from "google-auth-library";
 import { config } from 'dotenv';
-import { z } from 'zod';
+
+// schema definitions
+import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema } from './schemas';
 
 // load environment variables from .env
 config();
-
-// environment variables validation schema
-const envSchema = z.object({
-	GOOGLE_APPLICATION_CREDENTIALS: z.string(),
-	CM360_PROFILE_ID: z.string(),
-	NODE_ENV: z.enum(["development", "production"]).optional().default("production"),
-});
 
 // validate environment variables
 const env = envSchema.parse(process.env);
@@ -38,14 +33,6 @@ const client = new JWT({
 // base URL for CM360 API v4
 const baseUrl = `https://dfareporting.googleapis.com/dfareporting/v4/userprofiles/${env.CM360_PROFILE_ID}`;
 
-// Define schemas outside the object for proper type inference
-const ListAdvertisersSchema = z.object({
-	searchString: z.string().optional().default("")
-});
-const ListCampaignsSchema = z.object({
-	advertiserIds: z.number().array().optional(),
-	searchString: z.string().optional().default("")
-});
 
 // Define types for paginatedRequest function
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -67,10 +54,11 @@ interface McpResponse {
 	isError?: boolean;
 }
 
+// global vars
+let selectedAdvertiserId: number | null = null;
+
 // Main CM360 API module
 export const cm360 = {
-	// type definitions
-	//ListAdvertisersSchema,
 
 	// tool definitions
 	tools: async () => {
@@ -139,13 +127,28 @@ export const cm360 = {
 		return mcpReturnJSON(advertisers);
 	}, 
 
-	/*
+	
 	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
+		try {
+			const parsedArgs = SelectAdvertiserSchema.parse(args || {});
+			selectedAdvertiserId = parsedArgs.advertiserId;
 
-	}, // end handleSelectAdvertiser*/
+		}
+		catch (error) {
+			console.error('Failed to select advertiser', error);
+			selectedAdvertiserId = null;
+			throw error;
+		}
+	},
 
 	handleListCampaigns: async (args?: Record<string, unknown>): Promise<McpResponse> => {
 		const parsedArgs = ListCampaignsSchema.parse(args || {});
+
+		// use the selected advertiser ID (if there is one)
+		if(parsedArgs.advertiserIds.length == 0 && selectedAdvertiserId) {
+			parsedArgs.advertiserIds.push(selectedAdvertiserId);
+		}
+
 		const url = `${baseUrl}/campaigns`;
 		const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
 		console.error(`Successfully retrieved ${campaigns.length} campaigns`);
