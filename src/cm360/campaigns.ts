@@ -5,16 +5,19 @@ import { baseUrl, selectedAdvertiserId } from './context';
 
 // Handler for campaign listing
 export const handleListCampaigns = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	console.error("[MCP TOOL INVOCATION] handleListCampaigns called with args:", args);
 	const parsedArgs = ListCampaignsSchema.parse(args || {});
+	console.error("[MCP TOOL INVOCATION] handleListCampaigns parsedArgs:", parsedArgs);
 
 	// use the selected advertiser ID (if there is one)
 	if(parsedArgs.advertiserIds && parsedArgs.advertiserIds.length == 0 && selectedAdvertiserId) {
+		console.error("[MCP TOOL INVOCATION] handleListCampaigns using selectedAdvertiserId:", selectedAdvertiserId);
 		parsedArgs.advertiserIds.push(selectedAdvertiserId);
 	}
 
 	const url = `${baseUrl}/campaigns`;
 	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
-	console.error(`Successfully retrieved ${items.length} campaigns`);
+	console.error(`[MCP TOOL INVOCATION] handleListCampaigns response: ${items.length} campaigns, nextPageToken: ${nextPageToken}`);
 	return mcpReturnJSON({
 		campaigns: items,
 		nextPageToken

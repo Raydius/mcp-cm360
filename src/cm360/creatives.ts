@@ -5,16 +5,19 @@ import { baseUrl, selectedAdvertiserId } from './context';
 
 // Handler for creative listing
 export const handleListCreatives = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	console.error("[MCP TOOL INVOCATION] handleListCreatives called with args:", args);
 	const parsedArgs = ListCreativesSchema.parse(args || {});
+	console.error("[MCP TOOL INVOCATION] handleListCreatives parsedArgs:", parsedArgs);
 
 	// use the selected advertiser ID (if there is one)
 	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+		console.error("[MCP TOOL INVOCATION] handleListCreatives using selectedAdvertiserId:", selectedAdvertiserId);
 		parsedArgs.advertiserIds.push(selectedAdvertiserId);
 	}
 
 	const url = `${baseUrl}/creatives`;
 	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "creatives");
-	console.error(`Successfully retrieved ${items.length} creatives`);
+	console.error(`[MCP TOOL INVOCATION] handleListCreatives response: ${items.length} creatives, nextPageToken: ${nextPageToken}`);
 	return mcpReturnJSON({
 		creatives: items,
 		nextPageToken
