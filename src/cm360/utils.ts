@@ -1,39 +1,28 @@
 import type { HttpMethod, CM360Response } from '../cm360';
 import { client } from './context';
 
-// paginatedRequest: Handles serial API requests due to paginated results
+// paginatedRequest: Exposes API pagination to the user (single page per request)
 export const paginatedRequest = async (
   url: string,
   baseParams: Record<string, any>,
   method: HttpMethod,
   valueArrayKey: string
-): Promise<any[]> => {
+): Promise<{ items: any[]; nextPageToken?: string; }> => {
 	try {
-		let pageToken = '';
-		let pageNumber = 1;
-		let isLastPage = false;
-		const valueArray: any[] = [];
-		do {
-			const params: Record<string, any> = (pageToken) ? {
-				pageToken, ...baseParams } : { ...baseParams };
-			console.error(`Sending request to ${url} with params:`, params);
-			const res = await client.request({
-				url,
-				method,
-				params,
-				timeout: 5000
-			});
-			const data = res.data as CM360Response;
-			if (data[valueArrayKey] && Array.isArray(data[valueArrayKey])) {
-				valueArray.push(...data[valueArrayKey]);
-			}
-			pageNumber++;
-			pageToken = data.nextPageToken || '';
-			if (!data[valueArrayKey] || data[valueArrayKey].length === 0 || !pageToken || pageNumber >= 10) {
-				isLastPage = true;
-			}
-		} while (!isLastPage);
-		return valueArray;
+		const params: Record<string, any> = { ...baseParams };
+		console.error(`Sending request to ${url} with params:`, params);
+		const res = await client.request({
+			url,
+			method,
+			params,
+			timeout: 5000
+		});
+		const data = res.data as CM360Response;
+		const items = (data[valueArrayKey] && Array.isArray(data[valueArrayKey]))
+			? data[valueArrayKey]
+			: [];
+		const nextPageToken = data.nextPageToken || undefined;
+		return { items, nextPageToken };
 	} catch (err) {
 		console.error("Error in paginatedRequest:");
 		if (err instanceof Error) {

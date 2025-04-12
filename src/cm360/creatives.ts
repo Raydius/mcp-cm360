@@ -13,9 +13,12 @@ export const handleListCreatives = async (args?: Record<string, unknown>): Promi
 	}
 
 	const url = `${baseUrl}/creatives`;
-	const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
-	console.error(`Successfully retrieved ${creatives.length} creatives`);
-	return mcpReturnJSON(creatives);
+	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "creatives");
+	console.error(`Successfully retrieved ${items.length} creatives`);
+	return mcpReturnJSON({
+		creatives: items,
+		nextPageToken
+	});
 };
 
 // Handler for creative groups listing
@@ -27,7 +30,10 @@ export const handleListCreativeGroups = async (args?: Record<string, unknown>): 
 	}
 
 	const url = `${baseUrl}/creativeGroups`;
-	const creativeGroups = await paginatedRequest(url, parsedArgs, "GET", "creativeGroups");
-	console.error(`Successfully retrieved ${creativeGroups.length} creative groups`);
-	return mcpReturnJSON(creativeGroups);
+	const { items: groupItems, nextPageToken: groupNextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "creativeGroups");
+	console.error(`Successfully retrieved ${groupItems.length} creative groups`);
+	return mcpReturnJSON({
+		creativeGroups: groupItems,
+		nextPageToken: groupNextPageToken
+	});
 };

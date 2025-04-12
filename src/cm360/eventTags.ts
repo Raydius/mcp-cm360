@@ -13,7 +13,10 @@ export const handleListEventTags = async (args?: Record<string, unknown>): Promi
 	}
 
 	const url = `${baseUrl}/eventTags`;
-	const eventTags = await paginatedRequest(url, parsedArgs, "GET", "eventTags");
-	console.error(`Successfully retrieved ${eventTags.length} event tags`);
-	return mcpReturnJSON(eventTags);
+	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "eventTags");
+	console.error(`Successfully retrieved ${items.length} event tags`);
+	return mcpReturnJSON({
+		eventTags: items,
+		nextPageToken
+	});
 };

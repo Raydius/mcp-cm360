@@ -13,7 +13,10 @@ export const handleListPlacements = async (args?: Record<string, unknown>): Prom
 	}
 
 	const url = `${baseUrl}/placements`;
-	const placements = await paginatedRequest(url, parsedArgs, "GET", "placements");
-	console.error(`Successfully retrieved ${placements.length} placements`);
-	return mcpReturnJSON(placements);
+	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "placements");
+	console.error(`Successfully retrieved ${items.length} placements`);
+	return mcpReturnJSON({
+		placements: items,
+		nextPageToken
+	});
 };

@@ -7,9 +7,12 @@ import { baseUrl, selectedAdvertiserId } from './context';
 export const handleListAdvertisers = async (args?: Record<string, unknown>): Promise<McpResponse> => {
 	const parsedArgs = ListAdvertisersSchema.parse(args || {});
 	const url = `${baseUrl}/advertisers`;
-	const advertisers = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
-	console.error(`Successfully retrieved ${advertisers.length} advertisers`);
-	return mcpReturnJSON(advertisers);
+	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
+	console.error(`Successfully retrieved ${items.length} advertisers`);
+	return mcpReturnJSON({
+		advertisers: items,
+		nextPageToken
+	});
 };
 
 // Handler to select an advertiser

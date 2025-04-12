@@ -13,9 +13,12 @@ export const handleListCampaigns = async (args?: Record<string, unknown>): Promi
 	}
 
 	const url = `${baseUrl}/campaigns`;
-	const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
-	console.error(`Successfully retrieved ${campaigns.length} campaigns`);
-	return mcpReturnJSON(campaigns);
+	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
+	console.error(`Successfully retrieved ${items.length} campaigns`);
+	return mcpReturnJSON({
+		campaigns: items,
+		nextPageToken
+	});
 };
 
 // Handler for campaign creative associations listing
@@ -29,7 +32,10 @@ export const handleListCampaignCreativeAssociations = async (args?: Record<strin
 	if (maxResults !== undefined) params.maxResults = maxResults;
 	if (pageToken !== undefined) params.pageToken = pageToken;
 
-	const associations = await paginatedRequest(url, params, "GET", "campaignCreativeAssociations");
-	console.error(`Successfully retrieved ${associations.length} campaignCreativeAssociations`);
-	return mcpReturnJSON(associations);
+	const { items, nextPageToken } = await paginatedRequest(url, params, "GET", "campaignCreativeAssociations");
+	console.error(`Successfully retrieved ${items.length} campaignCreativeAssociations`);
+	return mcpReturnJSON({
+		campaignCreativeAssociations: items,
+		nextPageToken
+	});
 };
