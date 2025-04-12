@@ -1,4 +1,4 @@
-import { cm360 } from '../src/cm360';
+import { cm360, handleListAdvertisers, handleListCampaigns } from '../src/cm360';
 import { mockJwtRequest, testLogger } from './setup';
 
 describe('CM360 API Module', () => {
@@ -23,7 +23,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockResolvedValueOnce(mockResponse);
 			
 			// Act
-			const result = await cm360.handleListAdvertisers();
+			const result = await handleListAdvertisers();
 			
 			// Assert
 			expect(mockJwtRequest).toHaveBeenCalledWith(expect.objectContaining({
@@ -62,7 +62,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockResolvedValueOnce(mockResponse);
 			
 			// Act
-			const result = await cm360.handleListAdvertisers({
+			const result = await handleListAdvertisers({
 				searchString: 'Test',
 			});
 			
@@ -114,7 +114,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockResolvedValueOnce(secondPageResponse);
 			
 			// Act
-			const result = await cm360.handleListAdvertisers();
+			const result = await handleListAdvertisers();
 			
 			// Assert
 			// First call should not have pageToken
@@ -161,7 +161,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockRejectedValueOnce(new Error(errorMessage));
 			
 			// Act & Assert
-			await expect(cm360.handleListAdvertisers()).rejects.toThrow(errorMessage);
+			await expect(handleListAdvertisers()).rejects.toThrow(errorMessage);
 			
 			// Verify error was logged
 			expect(testLogger.hasErrorLogged('API request failed')).toBe(true);
@@ -184,7 +184,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockResolvedValueOnce(mockResponse);
 			
 			// Act
-			const result = await cm360.handleListCampaigns();
+			const result = await handleListCampaigns();
 			
 			// Assert
 			expect(mockJwtRequest).toHaveBeenCalledWith(expect.objectContaining({
@@ -223,7 +223,7 @@ describe('CM360 API Module', () => {
 			mockJwtRequest.mockResolvedValueOnce(mockResponse);
 			
 			// Act
-			const result = await cm360.handleListCampaigns({
+			const result = await handleListCampaigns({
 				advertiserIds: [1],
 				searchString: 'Campaign',
 			});
@@ -261,50 +261,106 @@ describe('CM360 API Module', () => {
 			expect(result).toEqual({
 				tools: [
 					{
-						name: 'list-advertisers',
-						description: 'List advertisers associated with this account',
+						name: "list-advertisers",
+						description: "List advertisers associated with this account",
 						inputSchema: {
-							type: 'object',
+							type: "object",
 							properties: {
 								searchString: {
-									type: 'string',
-									description: 'Search query for advertiser name',
-									default: ''
-								}
-							},
-							required: [],
-						}
-					},
-					{
-						name: 'select-advertiser',
-						description: 'Select advertiser to use for subsequent interactions',
-						inputSchema: {
-							type: 'object',
-							properties: {
-								advertiserId: {
-									type: 'number',
-									description: 'ID of Advertiser to select',
+									type: "string",
+									description: "Search query for advertiser name",
+									default: ""
 								}
 							},
 							required: []
 						}
 					},
 					{
-						name: 'list-campaigns',
-						description: 'List campaigns associated with the selected advertiser (or account if no advertiser selected)',
+						name: "select-advertiser",
+						description: "Select advertiser to use for subsequent interactions",
 						inputSchema: {
-							type: 'object',
+							type: "object",
+							properties: {
+								advertiserId: {
+									type: "number",
+									description: "ID of Advertiser to select"
+								}
+							},
+							required: []
+						}
+					},
+					{
+						name: "list-campaigns",
+						description: "List campaigns associated with the selected advertiser (or account if no advertiser selected)",
+						inputSchema: {
+							type: "object",
 							properties: {
 								advertiserIds: {
-									type: 'array',
+									type: "array",
 									items: {
-										type: 'number'
+										type: "number"
 									},
-									description: 'ID of Advertiser you want to filter campaigns by'
+									description: "ID of Advertiser you want to filter campaigns by"
 								},
 								searchString: {
-									type: 'string',
-									description: 'Search query for campaign name'
+									type: "string",
+									description: "Search query for campaign name"
+								}
+							},
+							required: []
+						}
+					},
+					{
+						name: "list-creatives",
+						description: "List creatives associated with the selected advertiser and/or campaign",
+						inputSchema: {
+							type: "object",
+							properties: {
+								advertiserIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Advertisers to filter creatives by"
+								},
+								campaignIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Campaigns to filter creatives by"
+								},
+								searchString: {
+									type: "string",
+									description: "Search query for creative name"
+								}
+							},
+							required: []
+						}
+					},
+					{
+						name: "list-event-tags",
+						description: "List event tags associated with the selected advertiser and/or campaign",
+						inputSchema: {
+							type: "object",
+							properties: {
+								advertiserIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Advertisers to filter event tags by"
+								},
+								campaignIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Campaigns to filter event tags by"
+								},
+								searchString: {
+									type: "string",
+									description: "Search query for event tag name"
 								}
 							},
 							required: []

@@ -1,4 +1,4 @@
-import { cm360 } from '../src/cm360';
+import { cm360, handleListAdvertisers } from '../src/cm360';
 import { mockJwtRequest, testLogger } from './setup';
 
 describe('MCP Response Formatting', () => {
@@ -18,7 +18,7 @@ describe('MCP Response Formatting', () => {
 		});
 		
 		// Call the method that uses mcpReturnJSON
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Check the structure of the response
 		expect(result).toEqual({
@@ -67,7 +67,7 @@ describe('MCP Response Formatting', () => {
 		});
 		
 		// Call the method that uses mcpReturnJSON
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Check the structure of the response
 		expect(result).toEqual({
@@ -100,7 +100,7 @@ describe('MCP Response Formatting', () => {
 		});
 		
 		// Call the method that uses mcpReturnJSON
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Check the structure of the response
 		expect(result).toEqual({

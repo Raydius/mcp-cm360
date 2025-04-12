@@ -1,4 +1,4 @@
-import { cm360 } from '../src/cm360';
+import { cm360, handleListAdvertisers, handleListCampaigns } from '../src/cm360';
 import fs from 'fs';
 import path from 'path';
 
@@ -138,7 +138,7 @@ const logApiRequest = (options: any) => {
 	
 	it('should fetch advertisers from the CM360 API', async () => {
 		// Act
-		const result = await cm360.handleListAdvertisers({
+		const result = await handleListAdvertisers({
 			maxResults: 5
 		});
 		
@@ -158,7 +158,7 @@ const logApiRequest = (options: any) => {
 	
 	it('should fetch campaigns from the CM360 API', async () => {
 		// Act
-		const result = await cm360.handleListCampaigns({
+		const result = await handleListCampaigns({
 			maxResults: 5
 		});
 		
@@ -203,7 +203,7 @@ const logApiRequest = (options: any) => {
 		});
 		
 		// Act - get campaigns for advertiser ID 123
-		const result = await cm360.handleListCampaigns({
+		const result = await handleListCampaigns({
 			advertiserIds: [123],
 			maxResults: 5
 		});
@@ -251,7 +251,7 @@ const logApiRequest = (options: any) => {
 		});
 		
 		// Act - request more results than the default page size
-		const result = await cm360.handleListAdvertisers({
+		const result = await handleListAdvertisers({
 			maxResults: 20
 		});
 		

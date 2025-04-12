@@ -1,4 +1,4 @@
-import { cm360 } from '../src/cm360';
+import { cm360, handleListAdvertisers } from '../src/cm360';
 import { mockJwtRequest, testLogger } from './setup';
 
 describe('paginatedRequest', () => {
@@ -22,7 +22,7 @@ describe('paginatedRequest', () => {
 		mockJwtRequest.mockResolvedValueOnce(mockResponse);
 		
 		// Act
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Assert
 		expect(mockJwtRequest).toHaveBeenCalledTimes(1);
@@ -72,7 +72,7 @@ describe('paginatedRequest', () => {
 		mockJwtRequest.mockResolvedValueOnce(secondPageResponse);
 		
 		// Act
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Assert
 		expect(mockJwtRequest).toHaveBeenCalledTimes(2);
@@ -122,7 +122,7 @@ describe('paginatedRequest', () => {
 		mockJwtRequest.mockResolvedValueOnce(mockResponse);
 		
 		// Act
-		const result = await cm360.handleListAdvertisers();
+		const result = await handleListAdvertisers();
 		
 		// Assert
 		expect(mockJwtRequest).toHaveBeenCalledTimes(1);
@@ -144,7 +144,7 @@ describe('paginatedRequest', () => {
 		mockJwtRequest.mockRejectedValueOnce(new Error(errorMessage));
 		
 		// Act & Assert
-		await expect(cm360.handleListAdvertisers()).rejects.toThrow(errorMessage);
+		await expect(handleListAdvertisers()).rejects.toThrow(errorMessage);
 		
 		// Verify error was logged
 		expect(testLogger.hasErrorLogged('API request failed')).toBe(true);

@@ -47,10 +47,10 @@ const mockTools = jest.fn().mockResolvedValue({
 
 jest.mock('../src/cm360', () => ({
 	cm360: {
-		tools: mockTools,
-		handleListAdvertisers: mockHandleListAdvertisers,
-		handleListCampaigns: mockHandleListCampaigns
-	}
+		tools: mockTools
+	},
+	handleListAdvertisers: mockHandleListAdvertisers,
+	handleListCampaigns: mockHandleListCampaigns
 }));
 
 // Mock the MCP SDK types
