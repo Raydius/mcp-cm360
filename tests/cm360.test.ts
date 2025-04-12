@@ -339,6 +339,34 @@ describe('CM360 API Module', () => {
 						}
 					},
 					{
+						name: "list-creative-groups",
+						description: "List creative groups associated with the selected advertiser and/or campaign",
+						inputSchema: {
+							type: "object",
+							properties: {
+								advertiserIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Advertisers to filter creative groups by"
+								},
+								campaignIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Campaigns to filter creative groups by"
+								},
+								searchString: {
+									type: "string",
+									description: "Search query for creative group name"
+								}
+							},
+							required: []
+						}
+					},
+					{
 						name: "list-event-tags",
 						description: "List event tags associated with the selected advertiser and/or campaign",
 						inputSchema: {

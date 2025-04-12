@@ -11,7 +11,7 @@ import { JWT } from "google-auth-library";
 import { config } from 'dotenv';
 
 // schema definitions
-import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema, ListEventTagsSchema } from './schemas';
+import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema, ListEventTagsSchema, ListCreativeGroupsSchema } from './schemas';
 
 // load environment variables from .env
 config();
@@ -141,6 +141,34 @@ export const cm360 = {
 					}
 				},
 				{
+					name: "list-creative-groups",
+					description: "List creative groups associated with the selected advertiser and/or campaign",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Advertisers to filter creative groups by"
+							},
+							campaignIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Campaigns to filter creative groups by"
+							},
+							searchString: {
+								type: "string",
+								description: "Search query for creative group name"
+							}
+						},
+						required: []
+					}
+				},
+				{
 					name: "list-event-tags",
 					description: "List event tags associated with the selected advertiser and/or campaign",
 					inputSchema: {
@@ -214,6 +242,19 @@ export const handleSelectAdvertiser = async (args?: Record<string, unknown>): Pr
 		selectedAdvertiserId = null;
 		throw error;
 	}
+};
+
+export const handleListCreativeGroups = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListCreativeGroupsSchema.parse(args || {});
+
+	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+		parsedArgs.advertiserIds.push(selectedAdvertiserId);
+	}
+
+	const url = `${baseUrl}/creativeGroups`;
+	const creativeGroups = await paginatedRequest(url, parsedArgs, "GET", "creativeGroups");
+	console.error(`Successfully retrieved ${creativeGroups.length} creative groups`);
+	return mcpReturnJSON(creativeGroups);
 };
 
 // handler for campaign listing

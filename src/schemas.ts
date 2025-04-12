@@ -31,6 +31,12 @@ export const ListCreativesSchema = z.object({
 	searchString: z.string().optional().default("")
 });
 
+export const ListCreativeGroupsSchema = z.object({
+	advertiserIds: z.number().array().optional().default([]),
+	campaignIds: z.number().array().optional().default([]),
+	searchString: z.string().optional().default("")
+});
+
 export const ListEventTagsSchema = z.object({
 	advertiserIds: z.number().array().optional().default([]),
 	campaignIds: z.number().array().optional().default([]),
