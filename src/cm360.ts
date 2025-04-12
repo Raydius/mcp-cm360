@@ -35,10 +35,10 @@ const baseUrl = `https://dfareporting.googleapis.com/dfareporting/v4/userprofile
 
 
 // Define types for paginatedRequest function
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 // Define interface for CM360 API response
-interface CM360Response {
+export interface CM360Response {
 	advertisers?: any[];
 	campaigns?: any[];
 	nextPageToken?: string;
@@ -46,7 +46,7 @@ interface CM360Response {
 }
 
 // Define MCP response type
-interface McpResponse {
+export interface McpResponse {
 	content: Array<{
 		type: string;
 		text: string;
@@ -230,122 +230,18 @@ export const cm360 = {
 };
 
 // handler for event tag listing
-export const handleListEventTags = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListEventTagsSchema.parse(args || {});
+export { handleListEventTags } from './cm360/eventTags';
 
-	// use the selected advertiser ID (if there is one)
-	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
-		parsedArgs.advertiserIds.push(selectedAdvertiserId);
-	}
+export { handleListAdvertisers, handleSelectAdvertiser } from './cm360/advertisers';
 
-	const url = `${baseUrl}/eventTags`;
-	const eventTags = await paginatedRequest(url, parsedArgs, "GET", "eventTags");
-	console.error(`Successfully retrieved ${eventTags.length} event tags`);
-	return mcpReturnJSON(eventTags);
-};
-
-// handler to list all advertisers on the account
-export const handleListAdvertisers = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListAdvertisersSchema.parse(args || {});
-	const url = `${baseUrl}/advertisers`;
-	const advertisers = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
-	console.error(`Successfully retrieved ${advertisers.length} advertisers`);
-	return mcpReturnJSON(advertisers);
-};
-
-// handler to select an advertiser
-export const handleSelectAdvertiser = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	try {
-		const parsedArgs = SelectAdvertiserSchema.parse(args || {});
-		selectedAdvertiserId = parsedArgs.advertiserId;
-		return {
-			content: [{
-				type: "text",
-				text: "Advertiser selected successfully"
-			}]
-		};
-	}
-	catch (error) {
-		console.error('Failed to select advertiser', error);
-		selectedAdvertiserId = null;
-		throw error;
-	}
-};
-
-export const handleListCreativeGroups = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListCreativeGroupsSchema.parse(args || {});
-
-	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
-		parsedArgs.advertiserIds.push(selectedAdvertiserId);
-	}
-
-	const url = `${baseUrl}/creativeGroups`;
-	const creativeGroups = await paginatedRequest(url, parsedArgs, "GET", "creativeGroups");
-	console.error(`Successfully retrieved ${creativeGroups.length} creative groups`);
-	return mcpReturnJSON(creativeGroups);
-};
+export { handleListCreatives, handleListCreativeGroups } from './cm360/creatives';
 
 import { ListPlacementsSchema } from './schemas';
 
 // handler for placements listing
-export const handleListPlacements = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListPlacementsSchema.parse(args || {});
+export { handleListPlacements } from './cm360/placements';
 
-	// use the selected advertiser ID (if there is one)
-	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
-		parsedArgs.advertiserIds.push(selectedAdvertiserId);
-	}
-
-	const url = `${baseUrl}/placements`;
-	const placements = await paginatedRequest(url, parsedArgs, "GET", "placements");
-	console.error(`Successfully retrieved ${placements.length} placements`);
-	return mcpReturnJSON(placements);
-};
-
-// handler for campaign listing
-export const handleListCampaigns = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListCampaignsSchema.parse(args || {});
-
-	// use the selected advertiser ID (if there is one)
-	if(parsedArgs.advertiserIds.length == 0 && selectedAdvertiserId) {
-		parsedArgs.advertiserIds.push(selectedAdvertiserId);
-	}
-
-	const url = `${baseUrl}/campaigns`;
-	const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
-	console.error(`Successfully retrieved ${campaigns.length} campaigns`);
-	return mcpReturnJSON(campaigns);
-};
-
-// handler for creative listing
-export const handleListCreatives = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListCreativesSchema.parse(args || {});
-
-	// use the selected advertiser ID (if there is one)
-	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
-		parsedArgs.advertiserIds.push(selectedAdvertiserId);
-	}
-
-	const url = `${baseUrl}/creatives`;
-	const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
-	console.error(`Successfully retrieved ${creatives.length} creatives`);
-	return mcpReturnJSON(creatives);
-};
-
-export const handleListCampaignCreativeAssociations = async (args?: Record<string, unknown>): Promise<McpResponse> => {
-	const parsedArgs = ListCampaignCreativeAssociationsSchema.parse(args || {});
-	const { campaignId, maxResults, pageToken } = parsedArgs;
-
-	const url = `${baseUrl}/campaigns/${campaignId}/campaignCreativeAssociations`;
-
-	const params: Record<string, any> = {};
-	if (maxResults !== undefined) params.maxResults = maxResults;
-	if (pageToken !== undefined) params.pageToken = pageToken;
-
-	const associations = await paginatedRequest(url, params, "GET", "campaignCreativeAssociations");
-	console.error(`Successfully retrieved ${associations.length} campaignCreativeAssociations`);
-	return mcpReturnJSON(associations);
-};
+export { handleListCampaigns, handleListCampaignCreativeAssociations } from './cm360/campaigns';
 
 
 // handler for serial API requests due to paginated results
