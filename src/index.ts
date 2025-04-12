@@ -12,7 +12,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // CM360 API 
-import { cm360 } from "./cm360";
+import { cm360, handleListAdvertisers, handleListCampaigns, handleSelectAdvertiser, handleListCreatives, handleListEventTags } from "./cm360";
 
 // Add error handlers for uncaught exceptions and unhandled rejections
 process.on('uncaughtException', (error) => {
@@ -45,11 +45,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 	try {
 		switch (request.params.name) {
 			case "list-advertisers":
-				return await cm360.handleListAdvertisers(request.params.arguments);
+				return await handleListAdvertisers(request.params.arguments);
 			case "list-campaigns":
-				return await cm360.handleListCampaigns(request.params.arguments);
+				return await handleListCampaigns(request.params.arguments);
 			case "select-advertiser":
-				return await cm360.handleSelectAdvertiser(request.params.arguments);
+				return await handleSelectAdvertiser(request.params.arguments);
+			case "list-creatives":
+				return await handleListCreatives(request.params.arguments);
+			case "list-event-tags":
+				return await handleListEventTags(request.params.arguments);
 			default:
 				return {
 					content: [{

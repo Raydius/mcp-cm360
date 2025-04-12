@@ -11,7 +11,7 @@ import { JWT } from "google-auth-library";
 import { config } from 'dotenv';
 
 // schema definitions
-import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema } from './schemas';
+import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema, ListEventTagsSchema } from './schemas';
 
 // load environment variables from .env
 config();
@@ -59,8 +59,6 @@ let selectedAdvertiserId: number | null = null;
 
 // Main CM360 API module
 export const cm360 = {
-
-	// tool definitions
 	tools: async () => {
 		return {
 			tools: [
@@ -141,69 +139,111 @@ export const cm360 = {
 						},
 						required: []
 					}
+				},
+				{
+					name: "list-event-tags",
+					description: "List event tags associated with the selected advertiser and/or campaign",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Advertisers to filter event tags by"
+							},
+							campaignIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Campaigns to filter event tags by"
+							},
+							searchString: {
+								type: "string",
+								description: "Search query for event tag name"
+							}
+						},
+						required: []
+					}
 				}
 			]
 		};
-	},
-
-	// handler to list all advertisers on the account
-	handleListAdvertisers: async (args?: Record<string, unknown>): Promise<McpResponse> => {
-		const parsedArgs = ListAdvertisersSchema.parse(args || {});
-		const url = `${baseUrl}/advertisers`;
-		const advertisers = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
-		console.error(`Successfully retrieved ${advertisers.length} advertisers`);
-		return mcpReturnJSON(advertisers);
-	}, 
-
-	// handler to select an advertiser
-	handleSelectAdvertiser: async (args?: Record<string, unknown>): Promise<McpResponse> => {
-		try {
-			const parsedArgs = SelectAdvertiserSchema.parse(args || {});
-			selectedAdvertiserId = parsedArgs.advertiserId;
-			return {
-				content: [{
-					type: "text",
-					text: "Advertiser selected successfully"
-				}]
-			};
-		}
-		catch (error) {
-			console.error('Failed to select advertiser', error);
-			selectedAdvertiserId = null;
-			throw error;
-		}
-	},
-
-	// handler for campaign listing
-	handleListCampaigns: async (args?: Record<string, unknown>): Promise<McpResponse> => {
-		const parsedArgs = ListCampaignsSchema.parse(args || {});
-
-		// use the selected advertiser ID (if there is one)
-		if(parsedArgs.advertiserIds.length == 0 && selectedAdvertiserId) {
-			parsedArgs.advertiserIds.push(selectedAdvertiserId);
-		}
-
-		const url = `${baseUrl}/campaigns`;
-		const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
-		console.error(`Successfully retrieved ${campaigns.length} campaigns`);
-		return mcpReturnJSON(campaigns);
-	},
-
-	// handler for creative listing
-	handleListCreatives: async (args?: Record<string, unknown>): Promise<McpResponse> => {
-		const parsedArgs = ListCreativesSchema.parse(args || {});
-
-		// use the selected advertiser ID (if there is one)
-		if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
-			parsedArgs.advertiserIds.push(selectedAdvertiserId);
-		}
-
-		const url = `${baseUrl}/creatives`;
-		const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
-		console.error(`Successfully retrieved ${creatives.length} creatives`);
-		return mcpReturnJSON(creatives);
 	}
-	
+};
+
+// handler for event tag listing
+export const handleListEventTags = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListEventTagsSchema.parse(args || {});
+
+	// use the selected advertiser ID (if there is one)
+	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+		parsedArgs.advertiserIds.push(selectedAdvertiserId);
+	}
+
+	const url = `${baseUrl}/eventTags`;
+	const eventTags = await paginatedRequest(url, parsedArgs, "GET", "eventTags");
+	console.error(`Successfully retrieved ${eventTags.length} event tags`);
+	return mcpReturnJSON(eventTags);
+};
+
+// handler to list all advertisers on the account
+export const handleListAdvertisers = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListAdvertisersSchema.parse(args || {});
+	const url = `${baseUrl}/advertisers`;
+	const advertisers = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
+	console.error(`Successfully retrieved ${advertisers.length} advertisers`);
+	return mcpReturnJSON(advertisers);
+};
+
+// handler to select an advertiser
+export const handleSelectAdvertiser = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	try {
+		const parsedArgs = SelectAdvertiserSchema.parse(args || {});
+		selectedAdvertiserId = parsedArgs.advertiserId;
+		return {
+			content: [{
+				type: "text",
+				text: "Advertiser selected successfully"
+			}]
+		};
+	}
+	catch (error) {
+		console.error('Failed to select advertiser', error);
+		selectedAdvertiserId = null;
+		throw error;
+	}
+};
+
+// handler for campaign listing
+export const handleListCampaigns = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListCampaignsSchema.parse(args || {});
+
+	// use the selected advertiser ID (if there is one)
+	if(parsedArgs.advertiserIds.length == 0 && selectedAdvertiserId) {
+		parsedArgs.advertiserIds.push(selectedAdvertiserId);
+	}
+
+	const url = `${baseUrl}/campaigns`;
+	const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
+	console.error(`Successfully retrieved ${campaigns.length} campaigns`);
+	return mcpReturnJSON(campaigns);
+};
+
+// handler for creative listing
+export const handleListCreatives = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListCreativesSchema.parse(args || {});
+
+	// use the selected advertiser ID (if there is one)
+	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+		parsedArgs.advertiserIds.push(selectedAdvertiserId);
+	}
+
+	const url = `${baseUrl}/creatives`;
+	const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
+	console.error(`Successfully retrieved ${creatives.length} creatives`);
+	return mcpReturnJSON(creatives);
 };
 
 
