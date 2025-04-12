@@ -195,6 +195,34 @@ export const cm360 = {
 						},
 						required: []
 					}
+				},
+				{
+					name: "list-placements",
+					description: "List placements associated with the selected advertiser and/or campaign",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Advertisers to filter placements by"
+							},
+							campaignIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Campaigns to filter placements by"
+							},
+							searchString: {
+								type: "string",
+								description: "Search query for placement name"
+							}
+						},
+						required: []
+					}
 				}
 			]
 		};
@@ -255,6 +283,23 @@ export const handleListCreativeGroups = async (args?: Record<string, unknown>): 
 	const creativeGroups = await paginatedRequest(url, parsedArgs, "GET", "creativeGroups");
 	console.error(`Successfully retrieved ${creativeGroups.length} creative groups`);
 	return mcpReturnJSON(creativeGroups);
+};
+
+import { ListPlacementsSchema } from './schemas';
+
+// handler for placements listing
+export const handleListPlacements = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListPlacementsSchema.parse(args || {});
+
+	// use the selected advertiser ID (if there is one)
+	if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+		parsedArgs.advertiserIds.push(selectedAdvertiserId);
+	}
+
+	const url = `${baseUrl}/placements`;
+	const placements = await paginatedRequest(url, parsedArgs, "GET", "placements");
+	console.error(`Successfully retrieved ${placements.length} placements`);
+	return mcpReturnJSON(placements);
 };
 
 // handler for campaign listing

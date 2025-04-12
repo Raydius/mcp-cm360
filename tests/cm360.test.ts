@@ -252,6 +252,132 @@ describe('CM360 API Module', () => {
 		});
 	});
 
+	describe('handleListPlacements', () => {
+		const { handleListPlacements } = require('../src/cm360');
+
+		it('should fetch placements with default parameters', async () => {
+			const mockResponse = {
+				data: {
+					placements: [
+						{ id: 201, name: 'Placement 1' },
+						{ id: 202, name: 'Placement 2' }
+					]
+				}
+			};
+			mockJwtRequest.mockResolvedValueOnce(mockResponse);
+
+			const result = await handleListPlacements();
+			expect(mockJwtRequest).toHaveBeenCalledWith(expect.objectContaining({
+				url: expect.stringContaining('/placements'),
+				method: 'GET',
+				params: expect.objectContaining({
+					searchString: '',
+				})
+			}));
+			expect(result).toEqual({
+				content: [{
+					type: 'text',
+					text: JSON.stringify([
+						{ id: 201, name: 'Placement 1' },
+						{ id: 202, name: 'Placement 2' }
+					], null, 2)
+				}]
+			});
+			expect(testLogger.logs.error).toHaveLength(0);
+		});
+
+		it('should fetch placements with custom parameters', async () => {
+			const mockResponse = {
+				data: {
+					placements: [
+						{ id: 203, name: 'Test Placement' }
+					]
+				}
+			};
+			mockJwtRequest.mockResolvedValueOnce(mockResponse);
+
+			const result = await handleListPlacements({
+				advertiserIds: [1],
+				campaignIds: [10],
+				searchString: 'Test'
+			});
+			expect(mockJwtRequest).toHaveBeenCalledWith(expect.objectContaining({
+				url: expect.stringContaining('/placements'),
+				method: 'GET',
+				params: expect.objectContaining({
+					advertiserIds: [1],
+					campaignIds: [10],
+					searchString: 'Test'
+				})
+			}));
+			expect(result).toEqual({
+				content: [{
+					type: 'text',
+					text: JSON.stringify([
+						{ id: 203, name: 'Test Placement' }
+					], null, 2)
+				}]
+			});
+			expect(testLogger.logs.error).toHaveLength(0);
+		});
+
+		it('should handle pagination correctly', async () => {
+			const firstPageResponse = {
+				data: {
+					placements: [
+						{ id: 201, name: 'Placement 1' },
+						{ id: 202, name: 'Placement 2' }
+					],
+					nextPageToken: 'next-page-token'
+				}
+			};
+			const secondPageResponse = {
+				data: {
+					placements: [
+						{ id: 203, name: 'Placement 3' }
+					]
+				}
+			};
+			mockJwtRequest.mockResolvedValueOnce(firstPageResponse);
+			mockJwtRequest.mockResolvedValueOnce(secondPageResponse);
+
+			const result = await handleListPlacements();
+			expect(mockJwtRequest).toHaveBeenNthCalledWith(1, expect.objectContaining({
+				url: expect.stringContaining('/placements'),
+				method: 'GET',
+				params: expect.objectContaining({
+					searchString: '',
+				})
+			}));
+			expect(mockJwtRequest).toHaveBeenNthCalledWith(2, expect.objectContaining({
+				url: expect.stringContaining('/placements'),
+				method: 'GET',
+				params: expect.objectContaining({
+					searchString: '',
+					pageToken: 'next-page-token'
+				})
+			}));
+			expect(result).toEqual({
+				content: [{
+					type: 'text',
+					text: JSON.stringify([
+						{ id: 201, name: 'Placement 1' },
+						{ id: 202, name: 'Placement 2' },
+						{ id: 203, name: 'Placement 3' }
+					], null, 2)
+				}]
+			});
+			expect(testLogger.logs.error).toHaveLength(0);
+		});
+
+		it('should handle API errors gracefully', async () => {
+			const errorMessage = 'API request failed';
+			mockJwtRequest.mockRejectedValueOnce(new Error(errorMessage));
+			await expect(handleListPlacements()).rejects.toThrow(errorMessage);
+			expect(testLogger.hasErrorLogged('API request failed')).toBe(true);
+		});
+	});
+
 	describe('tools', () => {
 		it('should return the list of available tools', async () => {
 			// Act
@@ -389,6 +515,35 @@ describe('CM360 API Module', () => {
 								searchString: {
 									type: "string",
 									description: "Search query for event tag name"
+								}
+							},
+							required: []
+						}
+					}
+				,
+					{
+						name: "list-placements",
+						description: "List placements associated with the selected advertiser and/or campaign",
+						inputSchema: {
+							type: "object",
+							properties: {
+								advertiserIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Advertisers to filter placements by"
+								},
+								campaignIds: {
+									type: "array",
+									items: {
+										type: "number"
+									},
+									description: "IDs of Campaigns to filter placements by"
+								},
+								searchString: {
+									type: "string",
+									description: "Search query for placement name"
 								}
 							},
 							required: []
