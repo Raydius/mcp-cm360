@@ -4,13 +4,18 @@ import type { McpResponse } from '../cm360';
 import { baseUrl, selectedAdvertiserId } from './context';
 
 // Handler to list all advertisers on the account
+import { mcpFileLog } from './utils';
+
 export const handleListAdvertisers = async (args?: Record<string, unknown>): Promise<McpResponse> => {
 	console.error("[MCP TOOL INVOCATION] handleListAdvertisers called with args:", args);
+	mcpFileLog("[MCP TOOL INVOCATION] handleListAdvertisers called with args:", args);
 	const parsedArgs = ListAdvertisersSchema.parse(args || {});
 	console.error("[MCP TOOL INVOCATION] handleListAdvertisers parsedArgs:", parsedArgs);
+	mcpFileLog("[MCP TOOL INVOCATION] handleListAdvertisers parsedArgs:", parsedArgs);
 	const url = `${baseUrl}/advertisers`;
 	const { items, nextPageToken } = await paginatedRequest(url, parsedArgs, "GET", "advertisers");
 	console.error(`[MCP TOOL INVOCATION] handleListAdvertisers response: ${items.length} advertisers, nextPageToken: ${nextPageToken}`);
+	mcpFileLog(`[MCP TOOL INVOCATION] handleListAdvertisers response: ${items.length} advertisers, nextPageToken: ${nextPageToken}`);
 	return mcpReturnJSON({
 		advertisers: items,
 		nextPageToken
@@ -20,12 +25,15 @@ export const handleListAdvertisers = async (args?: Record<string, unknown>): Pro
 // Handler to select an advertiser
 export const handleSelectAdvertiser = async (args?: Record<string, unknown>): Promise<McpResponse> => {
 	console.error("[MCP TOOL INVOCATION] handleSelectAdvertiser called with args:", args);
+	mcpFileLog("[MCP TOOL INVOCATION] handleSelectAdvertiser called with args:", args);
 	try {
 		const parsedArgs = SelectAdvertiserSchema.parse(args || {});
 		console.error("[MCP TOOL INVOCATION] handleSelectAdvertiser parsedArgs:", parsedArgs);
+		mcpFileLog("[MCP TOOL INVOCATION] handleSelectAdvertiser parsedArgs:", parsedArgs);
 		// @ts-ignore
 		require('./context').selectedAdvertiserId = parsedArgs.advertiserId;
 		console.error("[MCP TOOL INVOCATION] handleSelectAdvertiser set selectedAdvertiserId:", parsedArgs.advertiserId);
+		mcpFileLog("[MCP TOOL INVOCATION] handleSelectAdvertiser set selectedAdvertiserId:", parsedArgs.advertiserId);
 		return {
 			content: [{
 				type: "text",
@@ -35,6 +43,7 @@ export const handleSelectAdvertiser = async (args?: Record<string, unknown>): Pr
 	}
 	catch (error) {
 		console.error('[MCP TOOL INVOCATION] Failed to select advertiser', error);
+		mcpFileLog('[MCP TOOL INVOCATION] Failed to select advertiser', error);
 		// @ts-ignore
 		require('./context').selectedAdvertiserId = null;
 		throw error;
