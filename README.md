@@ -10,6 +10,33 @@ This MCP server provides tools for interacting with the CM360 API, allowing you 
 - Select an advertiser to work with
 - List campaigns associated with an advertiser
 
+## Debug Logging
+
+**New in April 2025:**  
+A file-based debug logging system is now implemented for all major MCP tool handlers. This system writes detailed invocation and debug information to a file named `mcp-debug.log` in the project root.
+
+- The log file is overwritten each time the MCP server process starts, so it only contains logs for the current session.
+- All tool invocations, parsed arguments, and key debug information are recorded.
+- This is especially useful when the MCP server is managed by a chat application (such as Claude Desktop) and console output is not visible.
+
+**How to use:**
+- After running tool invocations (via chat agent or Inspector), open `mcp-debug.log` in the project root to review the logs.
+- The log includes timestamps, tool names, arguments, and results for each handler.
+
+**Example log entry:**
+```
+[MCP DEBUG LOG - 2025-04-12T21:00:00.000Z]
+[2025-04-12T21:01:23.456Z] [MCP TOOL INVOCATION] handleListCampaigns called with args: { ... }
+[2025-04-12T21:01:23.457Z] [MCP TOOL INVOCATION] handleListCampaigns parsedArgs: { ... }
+[2025-04-12T21:01:23.500Z] [MCP TOOL INVOCATION] handleListCampaigns response: 2 campaigns, nextPageToken: null
+```
+
+**Log file location:**  
+`./mcp-debug.log` (relative to the project root)
+
+**Note:**  
+The log file is reset on each server start to prevent unbounded growth and to focus on the current debugging session.
+
 ## Installation
 
 ```bash

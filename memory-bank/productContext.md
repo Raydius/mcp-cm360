@@ -22,6 +22,14 @@ This project is an MCP server that interfaces with the CM360 API v4, designed fo
   - The `src/cm360.ts` file now serves as an entry point and compatibility layer, delegating to the modularized handlers.
 - This architecture improves maintainability, separation of concerns, and extensibility for future development.
 
+## Debug Logging System
+
+- As of April 2025, a file-based debug logging system is implemented for all major MCP tool handlers.
+- All invocation and debug information is written to `mcp-debug.log` in the project root.
+- The log file is overwritten on each server start, ensuring only the current session is recorded.
+- This system is essential for debugging tool invocations when the MCP server is managed by a chat application and console output is not visible.
+- Log entries include timestamps, tool names, arguments, and results for each handler.
+
 ## Core Memory Bank Files
 - **productContext.md**: Project vision, goals, and constraints (this file).
 - **activeContext.md**: Current session state and goals.

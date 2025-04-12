@@ -56,3 +56,22 @@ Refactor the CM360 API integration to use a modular handler structure:
 - Updated `src/cm360/index.ts` to re-export all handlers.
 - Updated documentation and Memory Bank files to reflect the new architecture.
 - Removed references to the old monolithic handler pattern.
+
+---
+
+## [2025-04-12] - File-Based Debug Logging System
+
+**Context:**  
+Debugging tool invocations was difficult when the MCP server was managed by a chat application and console output was not visible.
+
+**Decision:**  
+Implement a file-based debug logging system for all major MCP tool handlers. All invocation and debug information is now written to `mcp-debug.log` in the project root, and the log file is overwritten on each server start.
+
+**Rationale:**  
+- Ensures that invocation and debug information is always accessible, regardless of how the MCP server is managed.
+- Supports session-based debugging and troubleshooting.
+
+**Implementation:**  
+- Added a logging utility to `src/cm360/utils.ts` that writes to `mcp-debug.log`.
+- Updated all major tool handlers to log invocation, arguments, and results to the file.
+- Documented the logging system in README.md and Memory Bank files.

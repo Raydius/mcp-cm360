@@ -1,6 +1,7 @@
 # Developer tools config
 .clinerules-*
 cm360.json
+mcp-debug.log
 
 # Dependency directories
 node_modules/
