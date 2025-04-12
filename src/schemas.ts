@@ -48,3 +48,10 @@ export const ListPlacementsSchema = z.object({
 	campaignIds: z.number().array().optional().default([]),
 	searchString: z.string().optional().default("")
 });
+
+export const ListCampaignCreativeAssociationsSchema = z.object({
+	profileId: z.number(),
+	campaignId: z.number(),
+	maxResults: z.number().optional(),
+	pageToken: z.string().optional()
+});

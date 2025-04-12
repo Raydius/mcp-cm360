@@ -1,4 +1,4 @@
-import { cm360, handleListAdvertisers, handleListCampaigns } from '../src/cm360';
+import { cm360, handleListAdvertisers, handleListCampaigns, handleListCampaignCreativeAssociations } from '../src/cm360';
 import fs from 'fs';
 import path from 'path';
 
@@ -267,4 +267,73 @@ const logApiRequest = (options: any) => {
 		expect(advertisers[0].id).toBe(123);
 		expect(advertisers[2].id).toBe(789);
 	});
-});
+		// Override the mock for this test to include pagination
+		mockJwtRequest.mockImplementationOnce((options) => {
+			// Log the API request for the first page
+			logApiRequest(options);
+			
+			return Promise.resolve({
+				data: {
+					advertisers: [
+						{ id: 123, name: 'Test Advertiser 1' },
+						{ id: 456, name: 'Test Advertiser 2' }
+					],
+					nextPageToken: 'page2token'
+				}
+			});
+		}).mockImplementationOnce((options) => {
+			// Log the API request for the second page
+			logApiRequest(options);
+			
+			return Promise.resolve({
+				data: {
+					advertisers: [
+						{ id: 789, name: 'Test Advertiser 3' },
+						{ id: 101, name: 'Test Advertiser 4' }
+					],
+					nextPageToken: null
+				}
+			});
+		});
+		// Act - request more results than the default page size
+		let result;
+		(async () => {
+			result = await handleListAdvertisers({
+				maxResults: 20
+			});
+			// Assert
+			expect(result).toHaveProperty('content');
+			expect(result.content[0]).toHaveProperty('type', 'text');
+			
+			const advertisers = JSON.parse(result.content[0].text);
+			expect(Array.isArray(advertisers)).toBe(true);
+			expect(advertisers.length).toBe(4);
+			
+			// Check that we got advertisers from both pages
+			expect(advertisers[0].id).toBe(123);
+			expect(advertisers[2].id).toBe(789);
+		})();
+	});
+
+	it('should fetch campaign creative associations from the CM360 API', async () => {
+		// These values should be set to valid test data for your environment
+		const profileId = Number(process.env.CM360_PROFILE_ID);
+		const campaignId = 123; // Replace with a valid campaign ID for your test account
+
+		// Act
+		const result = await handleListCampaignCreativeAssociations({
+			profileId,
+			campaignId,
+			maxResults: 5
+		});
+
+		const associations = JSON.parse(result.content[0].text);
+		expect(Array.isArray(associations)).toBe(true);
+
+		// Optionally check structure if you know what fields to expect
+		if (associations.length > 0) {
+			const assoc = associations[0];
+			expect(assoc).toHaveProperty('creativeId');
+			expect(assoc).toHaveProperty('campaignId');
+		}
+	});

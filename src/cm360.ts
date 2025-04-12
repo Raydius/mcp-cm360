@@ -11,7 +11,7 @@ import { JWT } from "google-auth-library";
 import { config } from 'dotenv';
 
 // schema definitions
-import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema, ListEventTagsSchema, ListCreativeGroupsSchema } from './schemas';
+import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema, ListEventTagsSchema, ListCreativeGroupsSchema, ListCampaignCreativeAssociationsSchema } from './schemas';
 
 // load environment variables from .env
 config();
@@ -330,6 +330,21 @@ export const handleListCreatives = async (args?: Record<string, unknown>): Promi
 	const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
 	console.error(`Successfully retrieved ${creatives.length} creatives`);
 	return mcpReturnJSON(creatives);
+};
+
+export const handleListCampaignCreativeAssociations = async (args?: Record<string, unknown>): Promise<McpResponse> => {
+	const parsedArgs = ListCampaignCreativeAssociationsSchema.parse(args || {});
+	const { campaignId, maxResults, pageToken } = parsedArgs;
+
+	const url = `${baseUrl}/campaigns/${campaignId}/campaignCreativeAssociations`;
+
+	const params: Record<string, any> = {};
+	if (maxResults !== undefined) params.maxResults = maxResults;
+	if (pageToken !== undefined) params.pageToken = pageToken;
+
+	const associations = await paginatedRequest(url, params, "GET", "campaignCreativeAssociations");
+	console.error(`Successfully retrieved ${associations.length} campaignCreativeAssociations`);
+	return mcpReturnJSON(associations);
 };
 
 
