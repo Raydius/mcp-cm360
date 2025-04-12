@@ -32,3 +32,27 @@ To ensure the test suite accurately reflects the codebase, maintains full covera
 - Updated the tools test to expect all five tools.
 - Corrected jest.mock usage in index.test.ts.
 - Verified that all tests pass after these updates (6/6 suites, 25/25 tests).
+
+---
+
+## [2025-04-12] - Modularization of CM360 API Handlers
+
+**Context:**  
+As the number of CM360 API methods and handler functions grew, maintaining all logic in a single file (src/cm360.ts) became unwieldy and error-prone. There was a need for improved maintainability, clarity, and extensibility.
+
+**Decision:**  
+Refactor the CM360 API integration to use a modular handler structure:
+- Each API domain (advertisers, campaigns, creatives, eventTags, placements, etc.) is implemented as a separate module in the `src/cm360/` directory.
+- Handler functions are exported from their respective files and re-exported via `src/cm360/index.ts`.
+- The legacy src/cm360.ts file now serves as an entry point and compatibility layer, delegating to the modularized handlers.
+
+**Rationale:**  
+- Improves separation of concerns and code organization.
+- Makes it easier to add, test, and maintain individual API domains.
+- Supports future extensibility and onboarding of new developers.
+
+**Implementation:**  
+- Moved all handler functions to their respective domain files under `src/cm360/`.
+- Updated `src/cm360/index.ts` to re-export all handlers.
+- Updated documentation and Memory Bank files to reflect the new architecture.
+- Removed references to the old monolithic handler pattern.

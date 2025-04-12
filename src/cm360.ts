@@ -1,7 +1,8 @@
 /**
  * CM360 API Module
  * 
- * Interface for CM360 API with only read-only methods to prevent any accidental changes to ad trafficking
+ * Interface for CM360 API (v4) with only read-only methods to prevent any accidental changes to ad trafficking.
+ * API reference documentation: https://developers.google.com/doubleclick-advertisers/rest/v4
  * 
  * @author Ray Dollete <rjdollete@gmail.com>
  */
@@ -235,8 +236,6 @@ export { handleListEventTags } from './cm360/eventTags';
 export { handleListAdvertisers, handleSelectAdvertiser } from './cm360/advertisers';
 
 export { handleListCreatives, handleListCreativeGroups } from './cm360/creatives';
-
-import { ListPlacementsSchema } from './schemas';
 
 // handler for placements listing
 export { handleListPlacements } from './cm360/placements';
