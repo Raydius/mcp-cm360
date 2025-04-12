@@ -1,6 +1,5 @@
 # Developer tools config
 .clinerules-*
-memory-bank/
 cm360.json
 
 # Dependency directories
