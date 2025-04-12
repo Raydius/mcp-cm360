@@ -24,3 +24,9 @@ export const ListCampaignsSchema = z.object({
 	advertiserIds: z.number().array().optional().default([]),
 	searchString: z.string().optional().default("")
 });
+
+export const ListCreativesSchema = z.object({
+	advertiserIds: z.number().array().optional().default([]),
+	campaignIds: z.number().array().optional().default([]),
+	searchString: z.string().optional().default("")
+});

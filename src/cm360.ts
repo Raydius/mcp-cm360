@@ -11,7 +11,7 @@ import { JWT } from "google-auth-library";
 import { config } from 'dotenv';
 
 // schema definitions
-import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema } from './schemas';
+import { envSchema, ListAdvertisersSchema, SelectAdvertiserSchema, ListCampaignsSchema, ListCreativesSchema } from './schemas';
 
 // load environment variables from .env
 config();
@@ -113,6 +113,34 @@ export const cm360 = {
 						},
 						required: []
 					}
+				},
+				{
+					name: "list-creatives",
+					description: "List creatives associated with the selected advertiser and/or campaign",
+					inputSchema: {
+						type: "object",
+						properties: {
+							advertiserIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Advertisers to filter creatives by"
+							},
+							campaignIds: {
+								type: "array",
+								items: {
+									type: "number"
+								},
+								description: "IDs of Campaigns to filter creatives by"
+							},
+							searchString: {
+								type: "string",
+								description: "Search query for creative name"
+							}
+						},
+						required: []
+					}
 				}
 			]
 		};
@@ -159,6 +187,21 @@ export const cm360 = {
 		const campaigns = await paginatedRequest(url, parsedArgs, "GET", "campaigns");
 		console.error(`Successfully retrieved ${campaigns.length} campaigns`);
 		return mcpReturnJSON(campaigns);
+	},
+
+	// handler for creative listing
+	handleListCreatives: async (args?: Record<string, unknown>): Promise<McpResponse> => {
+		const parsedArgs = ListCreativesSchema.parse(args || {});
+
+		// use the selected advertiser ID (if there is one)
+		if (parsedArgs.advertiserIds.length === 0 && selectedAdvertiserId) {
+			parsedArgs.advertiserIds.push(selectedAdvertiserId);
+		}
+
+		const url = `${baseUrl}/creatives`;
+		const creatives = await paginatedRequest(url, parsedArgs, "GET", "creatives");
+		console.error(`Successfully retrieved ${creatives.length} creatives`);
+		return mcpReturnJSON(creatives);
 	}
 	
 };
