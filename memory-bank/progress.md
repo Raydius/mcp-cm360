@@ -11,11 +11,14 @@
 - Updated the tools test to match the current implementation (five tools).
 - Corrected jest.mock usage in index.test.ts to mock named exports.
 - Verified that all tests pass after these updates (6/6 suites, 25/25 tests).
+- **Added support for the creativeGroups.list API method following established design patterns.**
+- **Integrated creativeGroups.list into the test suite, updating the tools test and documenting the process in systemPatterns.md for future reference.**
 
 ## Next Steps
 - Maintain alignment between code and test suite as new features or refactors are introduced.
 - Continue to enforce read-only access and auditability for all CM360 API operations.
 - Ensure that all new tools and handlers are documented and tested.
+- **For future API method support, follow the documented pattern in systemPatterns.md to ensure consistency and test coverage.**
 
 ## Ongoing Memory Bank Update Process
 
